@@ -17,7 +17,9 @@ export interface CardOptions {
   aboutMe?: string;
   hideDecoration: boolean;
   hideSpotify: boolean;
-  theme: "dark" | "light" | "custom" | "nitroDark" | "nitroLight";
+  theme: "dark" | "light" | "custom" | "nitroDark" | "nitroLight"
+    | "catppuccinMocha" | "catppuccinLatte" | "catppuccinFrappe"
+    | "dracula" | "nord" | "tokyoNight" | "githubDark" | "gruvbox" | "solarized";
   primaryColor: string;
   accentColor: string;
   colorB1: string;

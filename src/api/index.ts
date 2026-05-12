@@ -59,7 +59,12 @@ const ParamsSchema = z.object({
   aboutMe: z.string().optional(),
   hideDecoration: z.coerce.boolean().default(false),
   hideSpotify: z.coerce.boolean().default(false),
-  theme: z.enum(["dark", "light", "custom", "nitroDark", "nitroLight"]).default("dark"),
+  theme: z.enum([
+    "dark", "light", "custom", "nitroDark", "nitroLight",
+    // Named presets
+    "catppuccinMocha", "catppuccinLatte", "catppuccinFrappe",
+    "dracula", "nord", "tokyoNight", "githubDark", "gruvbox", "solarized",
+  ]).default("dark"),
   primaryColor: z.string().default("ecaff3").refine(isHex, hexMessage).transform((val) => "#" + val),
   accentColor: z.string().default("44a17a").refine(isHex, hexMessage).transform((val) => "#" + val),
   colorB1: z.string().default("111214").refine(isHex, hexMessage).transform((val) => "#" + val),

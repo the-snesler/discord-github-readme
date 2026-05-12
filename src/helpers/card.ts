@@ -2,7 +2,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { UserProperties } from "./discord";
 import { setOpacity } from "./utils";
-import { darkColors, lightColors } from "./themes";
+import { darkColors, lightColors, presetThemes } from "./themes";
 import { BakedDisplayableComponent, CardOptions, DisplayableComponent, PrerenderProps } from "../types";
 import { SVGCard } from "../components/UserCard";
 import { spotifyActivity } from "../displayables/SpotifyActivity";
@@ -48,6 +48,8 @@ export const makeCard = async (user: UserProperties, options: CardOptions) => {
       colorT1: options.colorT1,
       colorT2: options.colorT2,
     }
+  } else if (options.theme in presetThemes) {
+    colors = { ...presetThemes[options.theme] };
   }
   const useNitroTheme = isNitroProfile(options.theme);
   if (useNitroTheme) {
