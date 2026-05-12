@@ -8,28 +8,128 @@ const mimeTypeMap: { [key: string]: string } = {
   gif: "image/gif",
 };
 
-const cache = new LRUCache<string, string>(1000)
+// Trusted domains from which arbitrary image URLs are allowed.
+// All other hostnames are rejected to prevent SSRF / open-proxy abuse.
+const ALLOWED_HOSTNAMES = new Set([
+  // Discord CDN
+  "cdn.discordapp.com",
+  "media.discordapp.net",
+  // GitHub
+  "avatars.githubusercontent.com",
+  "raw.githubusercontent.com",
+  "user-images.githubusercontent.com",
+  "github.com",
+  // Imgur
+  "i.imgur.com",
+  "imgur.com",
+  // Twitch
+  "static-cdn.jtvnw.net",
+  // Steam
+  "cdn.cloudflare.steamstatic.com",
+  "steamcdn-a.akamaihd.net",
+  // Generic image CDNs used by rich-presence apps
+  "i.scdn.co",           // Spotify album art
+  "lh3.googleusercontent.com", // Google user content
+]);
+
+const FETCH_TIMEOUT_MS = 5_000;
+const MAX_RESPONSE_BYTES = 5 * 1024 * 1024; // 5 MB
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+interface CacheEntry {
+  data: string;
+  expiresAt: number;
+}
+
+const cache = new LRUCache<string, CacheEntry>(1000);
 
 /**
  * Converts a URI to a Base64 string.
  * If the URI is a local file, it will be read using `fs.readFile`, otherwise it will be fetched.
+ *
+ * Security hardening applied to remote URLs:
+ * - Domain whitelist: only fetches from trusted hostnames to prevent SSRF.
+ * - 5-second fetch timeout via AbortController.
+ * - Rejects responses larger than 5 MB (Content-Length header + streaming byte-count).
+ * - 1-hour TTL on the LRU cache so avatar/asset changes are reflected within an hour.
+ *
  * @param uri The URI to convert.
  */
 export async function URItoBase64(uri: string) {
   if (!uri) { return null }
+
   const cached = cache.get(uri);
-  if (cached) return cached;
+  if (cached && Date.now() < cached.expiresAt) return cached.data;
+
   const ext = uri.split('.').pop();
   if (uri.startsWith('./')) {
     const buffer = await fs.readFile(uri);
     const dataType = mimeTypeMap[ext as string] || "application/octet-stream";
     return `data:${dataType};base64,${buffer.toString('base64')}`;
   }
-  const res = await fetch(uri);
-  const buffer = await res.arrayBuffer();
+
+  // --- Domain whitelist check ---
+  let hostname: string;
+  try {
+    hostname = new URL(uri).hostname;
+  } catch {
+    throw new Error(`URItoBase64: invalid URL: ${uri}`);
+  }
+  if (!ALLOWED_HOSTNAMES.has(hostname)) {
+    throw new Error(`URItoBase64: hostname not allowed: ${hostname}`);
+  }
+
+  // --- Fetch with timeout ---
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+  let res: Response;
+  try {
+    res = await fetch(uri, { signal: controller.signal });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+
+  if (!res.ok) {
+    throw new Error(`URItoBase64: fetch failed with status ${res.status} for ${uri}`);
+  }
+
+  // --- Content-Length pre-check ---
+  const contentLengthHeader = res.headers.get("content-length");
+  if (contentLengthHeader !== null) {
+    const contentLength = parseInt(contentLengthHeader, 10);
+    if (!isNaN(contentLength) && contentLength > MAX_RESPONSE_BYTES) {
+      // Discard the body to avoid keeping the connection open.
+      await res.body?.cancel();
+      throw new Error(`URItoBase64: response too large (${contentLength} bytes) for ${uri}`);
+    }
+  }
+
+  // --- Stream with byte-count guard ---
+  const reader = res.body?.getReader();
+  if (!reader) {
+    throw new Error(`URItoBase64: response body is not readable for ${uri}`);
+  }
+
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    totalBytes += value.byteLength;
+    if (totalBytes > MAX_RESPONSE_BYTES) {
+      await reader.cancel();
+      throw new Error(`URItoBase64: response exceeded ${MAX_RESPONSE_BYTES} bytes for ${uri}`);
+    }
+    chunks.push(value);
+  }
+
+  const buffer = Buffer.concat(chunks.map(c => Buffer.from(c)));
   const contentType = res.headers.get("content-type");
-  const output = `data:${contentType};base64,${Buffer.from(buffer).toString("base64")}`;
-  cache.set(uri, output);
+  const output = `data:${contentType};base64,${buffer.toString("base64")}`;
+
+  cache.set(uri, { data: output, expiresAt: Date.now() + CACHE_TTL_MS });
   return output;
 }
 
