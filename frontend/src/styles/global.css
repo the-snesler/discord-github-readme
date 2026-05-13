@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+@theme {
+  --color-discord-primary: #5865f2;
+  --color-discord-primary-hover: #4752c4;
+  --color-discord-bg: #313338;
+  --color-discord-bg-secondary: #2b2d31;
+  --color-discord-bg-tertiary: #1e1f22;
+  --color-discord-text: #f2f3f5;
+  --color-discord-text-muted: #b5bac1;
+  --color-discord-input-bg: #1e1f22;
+  --color-discord-border: #232428;
+  --color-discord-success: #3ba55c;
+  --color-discord-warn: #ff6b6b;
+  --radius-discord: 8px;
+  --font-sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+  background-color: var(--color-discord-bg);
+  color: var(--color-discord-text);
+}
+
+@layer components {
+  .field-input {
+    @apply w-full px-3.5 py-3 mb-4 rounded-[var(--radius-discord)] bg-discord-input-bg border border-discord-border text-discord-text text-sm transition-colors;
+  }
+  .field-input:focus {
+    @apply outline-none border-discord-primary;
+    box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.2);
+  }
+  .field-input:disabled {
+    @apply bg-discord-bg-tertiary text-discord-text-muted cursor-not-allowed opacity-70;
+  }
+
+  .btn-primary {
+    @apply w-full px-3.5 py-3 mb-4 rounded-[var(--radius-discord)] bg-discord-primary text-white font-semibold text-[15px] border-none cursor-pointer transition-colors;
+  }
+  .btn-primary:hover {
+    @apply bg-discord-primary-hover;
+  }
+  .btn-primary:active {
+    transform: translateY(1px);
+  }
+  .btn-primary:disabled {
+    @apply opacity-70 cursor-not-allowed;
+  }
+  .btn-success {
+    @apply bg-discord-success;
+  }
+}
