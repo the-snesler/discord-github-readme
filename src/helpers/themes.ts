@@ -79,7 +79,7 @@ export const darkColors: ColorTheme = {
   colorB1: "#111214",
   colorB2: "#313338",
   colorB3: "#505059",
-  colorT1: "#fff",
+  colorT1: "#ffffff",
   colorT2: "#d2d6d8",
 };
 export const lightColors: ColorTheme = {

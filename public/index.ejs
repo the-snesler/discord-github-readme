@@ -188,7 +188,7 @@
     }
 
     // Build preview URL from state
-    function buildPreviewUrl(state) {
+    function buildPreviewUrl(state, layout = 'standard') {
       const params = new URLSearchParams();
 
       if (state.enableAboutMe && state.aboutMe) {
@@ -223,6 +223,10 @@
         params.append('width', state.width.toString());
       }
 
+      if (layout !== 'standard') {
+        params.append('layout', layout);
+      }
+
       const base = `/api/user/${state.userId}`;
       const queryString = params.toString();
       return queryString ? `${base}?${queryString}` : base;
@@ -252,8 +256,14 @@
 
       // UI state
       const [copySuccess, setCopySuccess] = useState(false);
+      const [copyCompactSuccess, setCopyCompactSuccess] = useState(false);
+      const [copyBadgeSuccess, setCopyBadgeSuccess] = useState(false);
       const [previewSrc, setPreviewSrc] = useState(`/api/user/${defaultUserId}`);
+      const [compactPreviewSrc, setCompactPreviewSrc] = useState(`/api/user/${defaultUserId}?layout=compact`);
+      const [badgePreviewSrc, setBadgePreviewSrc] = useState(`/api/user/${defaultUserId}?layout=badge`);
       const [markdownUrl, setMarkdownUrl] = useState('');
+      const [compactMarkdownUrl, setCompactMarkdownUrl] = useState('');
+      const [badgeMarkdownUrl, setBadgeMarkdownUrl] = useState('');
       const [rawUrl, setRawUrl] = useState('');
       const [previewOpacity, setPreviewOpacity] = useState(1);
 
@@ -290,6 +300,8 @@
         };
 
         const url = buildPreviewUrl(state);
+        const compactUrl = buildPreviewUrl(state, 'compact');
+        const badgeUrl = buildPreviewUrl(state, 'badge');
 
         try {
           // Only fetch username if userId changed
@@ -302,18 +314,26 @@
             usernameCache.current = { id: userId, username };
           }
 
-          // Preload image
-          await new Promise((resolve, reject) => {
+          // Preload all three images in parallel
+          const preloadImage = (src) => new Promise((resolve, reject) => {
             const img = new Image();
             img.onload = resolve;
             img.onerror = reject;
-            img.src = url;
+            img.src = src;
           });
+          await Promise.all([preloadImage(url), preloadImage(compactUrl), preloadImage(badgeUrl)]);
 
+          const repoUrl = 'https://github.com/the-snesler/discord-github-preview';
           const fullUrl = window.location.origin + url;
+          const fullCompactUrl = window.location.origin + compactUrl;
+          const fullBadgeUrl = window.location.origin + badgeUrl;
           setPreviewSrc(url);
+          setCompactPreviewSrc(compactUrl);
+          setBadgePreviewSrc(badgeUrl);
           setRawUrl(fullUrl);
-          setMarkdownUrl(`[![${username}'s Discord status](${fullUrl})](https://github.com/TetraTsunami/discord-github-preview)`);
+          setMarkdownUrl(`[![${username}'s Discord status](${fullUrl})](${repoUrl})`);
+          setCompactMarkdownUrl(`[![${username}'s Discord status](${fullCompactUrl})](${repoUrl})`);
+          setBadgeMarkdownUrl(`[![${username}'s Discord status badge](${fullBadgeUrl})](${repoUrl})`);
           setPreviewOpacity(1);
         } catch (error) {
           console.error('Error:', error);
@@ -322,19 +342,22 @@
         }
       }, [userId, enableAboutMe, aboutMe, enableDecoration, enableSpotify, theme, nitroColors, customColors, width, overrideBanner, bannerUrl, bannerColor]);
 
-      // Copy URL handler
-      const copyUrl = useCallback(async () => {
-        if (!markdownUrl) return;
-
+      // Copy URL handlers
+      const makeCopyHandler = (getUrl, setSuccess) => async () => {
+        const url = getUrl();
+        if (!url) return;
         try {
-          await navigator.clipboard.writeText(markdownUrl);
-          setCopySuccess(true);
-          setTimeout(() => setCopySuccess(false), 2000);
+          await navigator.clipboard.writeText(url);
+          setSuccess(true);
+          setTimeout(() => setSuccess(false), 2000);
         } catch (err) {
           console.error('Failed to copy:', err);
           alert('Failed to copy URL');
         }
-      }, [markdownUrl]);
+      };
+      const copyUrl = useCallback(makeCopyHandler(() => markdownUrl, setCopySuccess), [markdownUrl]);
+      const copyCompactUrl = useCallback(makeCopyHandler(() => compactMarkdownUrl, setCopyCompactSuccess), [compactMarkdownUrl]);
+      const copyBadgeUrl = useCallback(makeCopyHandler(() => badgeMarkdownUrl, setCopyBadgeSuccess), [badgeMarkdownUrl]);
 
       // Username lookup handler
       const handleUsernameLookup = useCallback(async () => {
@@ -519,7 +542,7 @@
 
             <div class="column sticky">
               <div class="section">
-                <span class="label">Preview</span>
+                <span class="label">Standard Layout</span>
                 <div class="preview">
                   <img
                     src=${previewSrc}
@@ -527,17 +550,51 @@
                     style=${{ opacity: previewOpacity }}
                   />
                 </div>
-              </div>
-
-              <div class="section">
-                <span class="label">Markdown URL (for GitHub)</span>
-                <div class="result-box">${markdownUrl}</div>
+                <div class="result-box" style="margin-top: 8px;">${markdownUrl}</div>
                 <button
                   onClick=${copyUrl}
                   class=${copySuccess ? 'copy-success' : ''}
-                  style="margin-top: 12px;"
+                  style="margin-top: 8px;"
                 >
                   ${copySuccess ? 'Copied!' : 'Copy Markdown URL'}
+                </button>
+              </div>
+
+              <div class="section">
+                <span class="label">Compact Layout</span>
+                <div class="preview">
+                  <img
+                    src=${compactPreviewSrc}
+                    alt="Discord Profile Preview (Compact)"
+                    style=${{ opacity: previewOpacity }}
+                  />
+                </div>
+                <div class="result-box" style="margin-top: 8px;">${compactMarkdownUrl}</div>
+                <button
+                  onClick=${copyCompactUrl}
+                  class=${copyCompactSuccess ? 'copy-success' : ''}
+                  style="margin-top: 8px;"
+                >
+                  ${copyCompactSuccess ? 'Copied!' : 'Copy Markdown URL'}
+                </button>
+              </div>
+
+              <div class="section">
+                <span class="label">Badge Layout</span>
+                <div class="preview">
+                  <img
+                    src=${badgePreviewSrc}
+                    alt="Discord Status Badge"
+                    style=${{ opacity: previewOpacity, maxWidth: '50px' }}
+                  />
+                </div>
+                <div class="result-box" style="margin-top: 8px;">${badgeMarkdownUrl}</div>
+                <button
+                  onClick=${copyBadgeUrl}
+                  class=${copyBadgeSuccess ? 'copy-success' : ''}
+                  style="margin-top: 8px;"
+                >
+                  ${copyBadgeSuccess ? 'Copied!' : 'Copy Markdown URL'}
                 </button>
               </div>
 

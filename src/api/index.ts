@@ -1,5 +1,5 @@
 import readyClient from "../bot";
-import { makeCard } from "../helpers/card";
+import { makeCard, makeCompactCard, makeBadgeCard } from "../helpers/card";
 import { validateId, fetchUserInfo } from "../helpers/discord";
 import type { RequestHandler } from "express";
 import { URItoBase64 } from "../helpers/utils";
@@ -69,7 +69,8 @@ export const discordUser: RequestHandler = async (req, res, next) => {
     return;
   }
   try {
-    const user = await fetchUserInfo(client, id, options.animate, options.width);
+    const fetchWidth = options.layout === 'badge' ? 50 : options.width;
+    const user = await fetchUserInfo(client, id, options.animate, fetchWidth);
     if (!user) {
       res.status(404).send("User not found");
       return;
@@ -77,7 +78,14 @@ export const discordUser: RequestHandler = async (req, res, next) => {
     if (options.banner) {
       user.bannerURL = URItoBase64(options.banner);
     }
-    const card = await makeCard(user, options);
+    let card: string;
+    if (options.layout === 'compact') {
+      card = await makeCompactCard(user, options);
+    } else if (options.layout === 'badge') {
+      card = await makeBadgeCard(user, options);
+    } else {
+      card = await makeCard(user, options);
+    }
     res.set("Content-Type", "image/svg+xml").status(200).send(card);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Error";

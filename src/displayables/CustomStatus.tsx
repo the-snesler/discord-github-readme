@@ -1,7 +1,8 @@
 import React from "react";
 import { DisplayableComponent } from "../types";
-import { setOpacity, URItoBase64 } from "../helpers/utils";
+import { mixColors, setOpacity, URItoBase64 } from "../helpers/utils";
 import { fontFamily } from "../helpers/fonts";
+import { isNitroProfile } from "../helpers/card";
 
 export const customStatus: DisplayableComponent<string | null> = {
   height: 0,
@@ -12,14 +13,17 @@ export const customStatus: DisplayableComponent<string | null> = {
     const emojiUrl = hasCustomEmoji ? activity.emoji?.imageURL({ size: 64 }) : null;
     return URItoBase64(emojiUrl as string);
   },
-  render: ({ activity, colors, y, bannerHeight, serverProp }) => {
+  render: ({ activity, colors, y, bannerHeight, serverProp, options }) => {
     if (!activity) return;
     const hasEmoji = activity.emoji !== null;
     const hasText = activity.state !== null;
     const hasCustomEmoji = activity.emoji !== null && activity.emoji.id !== null;
     const emojiSize = hasEmoji && !hasText ? 70 : 30;
     const emojiName = activity.emoji?.name;
-    const background = setOpacity(colors.colorB2, 1);
+    let background = setOpacity(colors.colorB2, 1);
+    if (isNitroProfile(options.theme)) {
+      background = mixColors(background, mixColors(options.primaryColor, options.accentColor, 0.8), 0.85);
+    }
 
     return (
       <>

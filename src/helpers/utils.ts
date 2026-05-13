@@ -62,7 +62,7 @@ export const formatDuration = (time: number) => {
 
 // Converts a hex color string to an RGB array (e.g., "#FF5733" to [255, 87, 51], #FF5733AA to [255, 87, 51])
 const hexToRgb = (hex: string) => {
-  const bigint = parseInt(hex.slice(1, 8), 16);
+  const bigint = parseInt(hex.slice(1, 7), 16);
   const r = (bigint >> 16) & 255;
   const g = (bigint >> 8) & 255;
   const b = bigint & 255;
@@ -78,7 +78,7 @@ const rgbToHex = (r: number, g: number, b: number, a?: number) => {
  * Mixes two hex colors together based on a strength value. Supports transparency in said hex colors
  * @param color1 - The first color in hex format (e.g., "#FF5733")
  * @param color2 - The second color in hex format (e.g., "#33FF57AA")
- * @param strength - A value between 0 and 1 representing the mix strength
+ * @param strength - A value between 0 and 1 representing the proportion of color1 in the mix (e.g., 0.7 means 70% color1 and 30% color2)
  * @returns - The mixed color in hex format. If either color had an alpha channel, the result will also have an alpha channel.
  */
 export const mixColors = (color1: string, color2: string, strength: number): string => {

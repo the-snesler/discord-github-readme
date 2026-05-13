@@ -22,6 +22,7 @@ export const ParamsSchema = z
     aboutMe: z.string().optional(),
     hideDecoration: z.coerce.boolean().default(false),
     hideSpotify: z.coerce.boolean().default(false),
+    layout: z.enum(["standard", "compact", "badge"]).default("standard"),
     theme: z
       .enum([
         "dark",
