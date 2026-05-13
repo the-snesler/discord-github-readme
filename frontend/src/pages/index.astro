@@ -1,0 +1,31 @@
+---
+import App from '../components/App.svelte';
+import '../styles/global.css';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Discord Profile Preview Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Generate live SVG previews of your Discord profile (status, activity, Spotify) for embedding in GitHub READMEs and personal websites."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    {/* Runtime config injected by Express via string substitution of this sentinel. */}
+    <script is:inline>
+      window.__CONFIG__ = /*__CONFIG__*/ { defaultUserId: "", inviteUrl: "" } /*__CONFIG__*/;
+    </script>
+  </head>
+  <body class="px-5 py-8 leading-relaxed">
+    <App client:load />
+  </body>
+</html>

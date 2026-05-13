@@ -20,6 +20,14 @@ typings/
 # Dist #
 dist/
 
+# Frontend build artifacts #
+frontend/dist/
+frontend/.astro/
+public/index.html
+public/_astro/
+public/content-assets.mjs
+public/content-modules.mjs
+
 # IDE #
 .idea/
 *.swp
