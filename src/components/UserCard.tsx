@@ -90,7 +90,7 @@ export const SVGCard: React.FC<SVGCardProps> = ({
 
       <UserCardBackground
         colors={colors}
-        nitro={useNitroTheme}
+        options={options}
         totalHeight={totalHeight}
         banner={banner}
         user={user}

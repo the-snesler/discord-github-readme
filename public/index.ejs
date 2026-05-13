@@ -95,7 +95,8 @@
         { value: 'nitroDark', label: 'Nitro Dark' },
         { value: 'nitroLight', label: 'Nitro Light' },
         { value: 'custom', label: 'Custom' },
-        // Named presets
+      ];
+      const namedThemes = [
         { value: 'catppuccinMocha', label: 'Catppuccin Mocha' },
         { value: 'catppuccinLatte', label: 'Catppuccin Latte' },
         { value: 'catppuccinFrappe', label: 'Catppuccin Frappé' },
@@ -105,7 +106,7 @@
         { value: 'githubDark', label: 'GitHub Dark' },
         { value: 'gruvbox', label: 'Gruvbox' },
         { value: 'solarized', label: 'Solarized' },
-      ];
+      ]
 
       const showNitro = theme === 'nitroDark' || theme === 'nitroLight';
       const showCustom = theme === 'custom';
@@ -115,6 +116,20 @@
           <span class="label">Theme</span>
           <div style="margin-bottom: 15px;">
             ${themes.map(t => html`
+              <div class="checkbox-container" key=${t.value}>
+                <input
+                  type="radio"
+                  id=${t.value + 'Theme'}
+                  name="themeType"
+                  value=${t.value}
+                  checked=${theme === t.value}
+                  onChange=${() => setTheme(t.value)}
+                />
+                <label for=${t.value + 'Theme'}>${t.label}</label>
+              </div>
+            `)}
+            <hr style="margin: 15px 0;" />
+            ${namedThemes.map(t => html`
               <div class="checkbox-container" key=${t.value}>
                 <input
                   type="radio"
@@ -181,6 +196,8 @@
       }
       if (state.overrideBanner && state.bannerUrl) {
         params.append('banner', state.bannerUrl);
+      } else if (state.overrideBanner && state.bannerColor) {
+        params.append('bannerColor', state.bannerColor.replace(/^#/, ''));
       }
       if (!state.enableDecoration) {
         params.append('hideDecoration', 'true');
@@ -231,6 +248,7 @@
       const [width, setWidth] = useState('512');
       const [overrideBanner, setOverrideBanner] = useState(false);
       const [bannerUrl, setBannerUrl] = useState('');
+      const [bannerColor, setBannerColor] = useState('#000000');
 
       // UI state
       const [copySuccess, setCopySuccess] = useState(false);
@@ -267,7 +285,8 @@
           customColors,
           width,
           overrideBanner,
-          bannerUrl
+          bannerUrl,
+          bannerColor
         };
 
         const url = buildPreviewUrl(state);
@@ -301,7 +320,7 @@
           if (!silent) alert('Failed to generate preview. Please check the User ID and try again.');
           setPreviewOpacity(1);
         }
-      }, [userId, enableAboutMe, aboutMe, enableDecoration, enableSpotify, theme, nitroColors, customColors, width, overrideBanner, bannerUrl]);
+      }, [userId, enableAboutMe, aboutMe, enableDecoration, enableSpotify, theme, nitroColors, customColors, width, overrideBanner, bannerUrl, bannerColor]);
 
       // Copy URL handler
       const copyUrl = useCallback(async () => {
@@ -463,6 +482,11 @@
                     onInput=${(e) => setBannerUrl(e.target.value)}
                     placeholder="https://example.com/banner.png"
                     disabled=${!overrideBanner}
+                  />
+                  <span class="label">Banner Color</span>
+                  <${ColorInput}
+                    value=${bannerColor}
+                    onChange=${setBannerColor}
                   />
                 `}
               </div>

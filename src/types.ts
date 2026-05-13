@@ -1,6 +1,7 @@
 import { Activity } from "discord.js";
 import React from "react";
 import { UserProperties } from "./helpers/discord";
+import type { CardOptions } from "./schema";
 
 export interface ColorTheme {
   colorB1: string;
@@ -10,24 +11,7 @@ export interface ColorTheme {
   colorT2: string;
 }
 
-export interface CardOptions {
-  width: number;
-  animate: boolean;
-  banner?: string;
-  aboutMe?: string;
-  hideDecoration: boolean;
-  hideSpotify: boolean;
-  theme: "dark" | "light" | "custom" | "nitroDark" | "nitroLight"
-    | "catppuccinMocha" | "catppuccinLatte" | "catppuccinFrappe"
-    | "dracula" | "nord" | "tokyoNight" | "githubDark" | "gruvbox" | "solarized";
-  primaryColor: string;
-  accentColor: string;
-  colorB1: string;
-  colorB2: string;
-  colorB3: string;
-  colorT1: string;
-  colorT2: string;
-}
+export type { CardOptions };
 
 export interface ActivityDisplay {
   height: number;

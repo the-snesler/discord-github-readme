@@ -1,23 +1,28 @@
 import React from "react";
-import { ColorTheme } from "../types";
-import { bannerHeight } from "../helpers/card";
+import { CardOptions, ColorTheme } from "../types";
+import { bannerHeight, isNitroProfile } from "../helpers/card";
 import { UserProperties } from "../helpers/discord";
 
 interface Props {
   colors: ColorTheme;
-  nitro: boolean;
+  options: CardOptions;
   totalHeight: number;
   banner: string | null;
   user: UserProperties;
 }
 export default function cardBackground({
   colors,
-  nitro,
+  options,
   totalHeight,
   banner,
   user,
 }: Props) {
   const bgColor = colors.colorB1;
+  const nitro = isNitroProfile(options.theme);
+  const bannerFill = banner ? colors.colorB2 : 
+    options.bannerColor ? options.bannerColor :
+    user.accentColor || bgColor;
+  
   if (nitro) {
     return (
       <g>
@@ -86,7 +91,7 @@ export default function cardBackground({
                 width="700"
                 height={bannerHeight}
                 style={{
-                  fill: banner ? colors.colorB2 : user.accentColor || bgColor,
+                  fill: bannerFill,
                 }}
               />
               {banner && (
