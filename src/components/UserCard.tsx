@@ -56,6 +56,7 @@ export const SVGCard: React.FC<SVGCardProps> = ({
         strokeMiterlimit: 2,
       }}
     >
+      <title>{`${user.username} on Discord`}</title>
       <defs>
         <style>{GG_SANS_FONT_FACE}</style>
         <clipPath id="background">
