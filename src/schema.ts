@@ -6,7 +6,7 @@ const hexMessage = { error: "Colors must be in hexadecimal format without a lead
 export const ParamsSchema = z
   .object({
     width: z.coerce.number().default(500),
-    animate: z.coerce.boolean().default(false),
+    animate: z.coerce.boolean().default(true),
     banner: z
       .url({
         protocol: /^https?$/,
