@@ -1,4 +1,5 @@
 export interface RuntimeConfig {
+  defaultUserName: string;
   defaultUserId: string;
   inviteUrl: string;
 }
@@ -10,10 +11,10 @@ declare global {
 }
 
 export function getConfig(): RuntimeConfig {
-  if (typeof window === 'undefined' || !window.__CONFIG__) {
+  if (typeof window === "undefined" || !window.__CONFIG__) {
     // SSR path or pre-hydration: render with empty defaults; the hydrated
     // component will pick up real values on the client.
-    return { defaultUserId: '', inviteUrl: '' };
+    return { defaultUserName: "", defaultUserId: "", inviteUrl: "" };
   }
   return window.__CONFIG__;
 }

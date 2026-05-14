@@ -22,7 +22,11 @@ import '../styles/global.css';
     />
     {/* Runtime config injected by Express via string substitution of this sentinel. */}
     <script is:inline>
-      window.__CONFIG__ = /*__CONFIG__*/ { defaultUserId: "", inviteUrl: "" } /*__CONFIG__*/;
+      window.__CONFIG__ = /*__CONFIG__*/ {
+        defaultUserName: "tsunibot",
+        defaultUserId: "879917497959219250",
+        inviteUrl: "",
+      } /*__CONFIG__*/;
     </script>
   </head>
   <body class="px-5 py-8 leading-relaxed">
