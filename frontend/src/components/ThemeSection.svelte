@@ -29,6 +29,8 @@
     { value: 'light', label: 'Light', primary: '#5865f2', background: '#f2f3f5' },
     { value: 'nitroDark', label: 'Nitro Dark', primary: '#5865f2', background: 'linear-gradient(#6757a7 0%, #633951 100%)' },
     { value: 'nitroLight', label: 'Nitro Light', primary: '#5865f2', background: 'linear-gradient(#9582ff 0%, #fcd3ea 100%)' },
+  ];
+  const customTiles: Tile[] = [
     { value: 'catppuccinMocha', label: 'Mocha', primary: '#cba6f7', background: '#1e1e2e' },
     { value: 'dracula', label: 'Dracula', primary: '#ff79c6', background: '#282a36' },
     { value: 'nord', label: 'Nord', primary: '#88c0d0', background: '#2e3440' },
@@ -38,8 +40,8 @@
     { value: 'solarized', label: 'Solar', primary: '#b58900', background: '#002b36' },
     { value: 'catppuccinLatte', label: 'Latte', primary: '#8839ef', background: '#eff1f5' },
     { value: 'catppuccinFrappe', label: 'Frappé', primary: '#ca9ee6', background: '#303446' },
-    { value: 'custom', label: 'Custom', primary: '#f472b6', background: '#a78bfa' },
-  ];
+    { value: 'custom', label: 'Custom', primary: '#5865f2', background: 'linear-gradient(135deg, #1e1e2e 0%, #1e1e2e 20%, #282a36 20%, #282a36 40%, #633951 40%, #633951 60%, #002b36 60%, #002b36 80%, #eff1f5 80%, #eff1f5 100%)' },
+  ]
 
   const showNitro = $derived(theme === 'nitroDark' || theme === 'nitroLight');
   const showCustom = $derived(theme === 'custom');
@@ -58,7 +60,25 @@
         class="theme-tile {theme === t.value ? 'selected' : ''}"
         aria-pressed={theme === t.value}
       >
-        <div class="rounded-sm border border-white/10 p-2 flex gap-1" style:background={t.background}>
+        <div class="rounded-sm outline outline-white/20 p-2 flex gap-1" style:background={t.background}>
+          <div class="rounded-full w-5 h-5" style:background={t.primary}></div>
+          <div class="flex flex-col flex-1 gap-0.5">
+            <div class="rounded-full h-2 w-3/4 bg-neutral-500/50"></div>
+            <div class="rounded-full w-full h-1.5 bg-neutral-500/20"></div>
+          </div>
+        </div>
+        <div class="label">{t.label}</div>
+      </button>
+    {/each}
+    <hr class="col-span-full border-0 border-t border-white/10 my-1" />
+    {#each customTiles as t (t.value)}
+      <button
+        type="button"
+        onclick={() => setTheme(t.value)}
+        class="theme-tile {theme === t.value ? 'selected' : ''}"
+        aria-pressed={theme === t.value}
+      >
+        <div class="rounded-sm outline outline-white/20 p-2 flex gap-1" style:background={t.background}>
           <div class="rounded-full w-5 h-5" style:background={t.primary}></div>
           <div class="flex flex-col flex-1 gap-0.5">
             <div class="rounded-full h-2 w-3/4 bg-neutral-500/50"></div>
