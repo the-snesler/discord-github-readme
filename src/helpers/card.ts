@@ -59,12 +59,13 @@ interface CompactActivityInfo {
 }
 
 function getPriority(activity: Activity): number {
-  // sort activities by priority: rich presence > spotify > custom status > others
-  if (activity.type === 4) return 1;
-  if (activity.name === 'Spotify') return 2;
+  // sort activities by priority (higher is better): rich presence > spotify > others > custom status
+  if (activity.type === 4) return 0;
+  if (activity.name === "Spotify") return 2;
   if (activity.details || activity.state) return 3;
-  return 0;
+  return 1;
 }
+
 export function compactActivityInfo(activities: Activity[]): CompactActivityInfo {  
   activities.sort((a, b) => getPriority(b) - getPriority(a));
   for (const activity of activities) {

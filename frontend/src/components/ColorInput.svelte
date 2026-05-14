@@ -74,12 +74,12 @@
     aria-label="Pick color"
     onclick={() => (open = !open)}
     style:background-color={safeValue}
-    class="w-10 h-10 rounded-[var(--radius-discord)] border-2 border-discord-border cursor-pointer hover:border-discord-primary transition-colors block"
+    class="w-10 h-10 rounded-sm border-2 border-discord-border cursor-pointer hover:border-discord-primary transition-colors block"
   ></button>
 
   {#if open}
     <div
-      class="absolute top-full left-0 z-50 mt-2 p-4 bg-discord-bg-tertiary rounded-[var(--radius-discord)] border border-discord-border shadow-2xl"
+      class="absolute top-full left-0 z-50 mt-2 p-4 bg-discord-bg-tertiary rounded-sm border border-discord-border shadow-2xl"
     >
       <!-- Saturation/Value rectangle -->
       <div
@@ -89,12 +89,12 @@
         aria-valuenow={hsv.v}
         onpointerdown={onSaturationDown}
         style:background={`linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, ${hueColor})`}
-        class="relative w-[200px] h-[150px] rounded touch-none cursor-crosshair select-none"
+        class="relative w-50 h-37.5 rounded touch-none cursor-crosshair select-none"
       >
         <div
           style:left={`${hsv.s}%`}
           style:top={`${100 - hsv.v}%`}
-          class="absolute w-[18px] h-[18px] -ml-[9px] -mt-[9px] rounded-full border-[3px] border-white shadow pointer-events-none"
+          class="absolute w-4.5 h-4.5 -ml-2.25 -mt-2.25 rounded-full border-[3px] border-white shadow pointer-events-none"
         ></div>
       </div>
 
@@ -107,18 +107,18 @@
         aria-valuemax="360"
         aria-valuenow={hsv.h}
         onpointerdown={onHueDown}
-        class="relative w-[200px] h-[14px] mt-3 rounded-[7px] touch-none cursor-pointer select-none"
+        class="relative w-50 h-3.5 mt-3 rounded-[7px] touch-none cursor-pointer select-none"
         style:background={'linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)'}
       >
         <div
           style:left={`${(hsv.h / 360) * 100}%`}
-          class="absolute top-1/2 w-[18px] h-[18px] -ml-[9px] -mt-[9px] rounded-full border-[3px] border-white shadow pointer-events-none"
+          class="absolute top-1/2 w-4.5 h-4.5 -ml-2.25 -mt-2.25 rounded-full border-[3px] border-white shadow pointer-events-none"
         ></div>
       </div>
 
       <!-- Hex input -->
       <div
-        class="flex items-center mt-3 bg-discord-input-bg border border-discord-border rounded-[var(--radius-discord)] overflow-hidden focus-within:border-discord-primary"
+        class="flex items-center mt-3 bg-discord-input-bg border border-discord-border rounded-sm overflow-hidden focus-within:border-discord-primary"
       >
         <span class="pl-3 pr-0 py-2 text-discord-text-muted text-sm select-none font-mono">#</span>
         <input

@@ -1,9 +1,14 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import ColorInput from './ColorInput.svelte';
-  import ThemeSection from './ThemeSection.svelte';
-  import { buildPreviewUrl, type Theme, type PreviewState, type Layout } from '../lib/buildPreviewUrl';
-  import { getConfig } from '../lib/config';
+  import { onMount } from "svelte";
+  import ColorInput from "./ColorInput.svelte";
+  import ThemeSection from "./ThemeSection.svelte";
+  import {
+    buildPreviewUrl,
+    type Theme,
+    type PreviewState,
+    type Layout,
+  } from "../lib/buildPreviewUrl";
+  import { getConfig } from "../lib/config";
 
   const initial = getConfig();
 
@@ -11,51 +16,58 @@
   let inviteUrl = $state(initial.inviteUrl);
 
   let enableAboutMe = $state(false);
-  let aboutMe = $state('');
+  let aboutMe = $state("");
   let enableDecoration = $state(true);
   let enableSpotify = $state(true);
-  let theme = $state<Theme>('dark');
-  let nitroColors = $state({ primary: '#8180ff', accent: '#fe80c0' });
+  let theme = $state<Theme>("dark");
+  let nitroColors = $state({ primary: "#8180ff", accent: "#fe80c0" });
   let customColors = $state({
-    b1: '#111214',
-    b2: '#313338',
-    b3: '#505059',
-    t1: '#ffffff',
-    t2: '#d2d6d8',
+    b1: "#111214",
+    b2: "#313338",
+    b3: "#505059",
+    t1: "#ffffff",
+    t2: "#d2d6d8",
   });
-  let width = $state('512');
+  let width = $state(512);
   let overrideBanner = $state(false);
-  let bannerUrl = $state('');
-  let bannerColor = $state('#000000');
+  let bannerUrl = $state("");
+  let bannerColor = $state("#000000");
 
-  const REPO_URL = 'https://github.com/the-snesler/discord-github-preview';
+  const REPO_URL = "https://github.com/the-snesler/discord-github-preview";
 
-  let previews = $state<Record<Layout, { src: string; markdown: string; copied: boolean }>>({
+  let previews = $state<
+    Record<Layout, { src: string; markdown: string; rawUrl: string; html: string }>
+  >({
     standard: {
-      src: initial.defaultUserId ? `/api/user/${initial.defaultUserId}` : '',
-      markdown: '',
-      copied: false,
+      src: initial.defaultUserId ? `/api/user/${initial.defaultUserId}` : "",
+      markdown: "",
+      rawUrl: "",
+      html: "",
     },
     compact: {
-      src: initial.defaultUserId ? `/api/user/${initial.defaultUserId}?layout=compact` : '',
-      markdown: '',
-      copied: false,
+      src: initial.defaultUserId ? `/api/user/${initial.defaultUserId}?layout=compact` : "",
+      markdown: "",
+      rawUrl: "",
+      html: "",
     },
     badge: {
-      src: initial.defaultUserId ? `/api/user/${initial.defaultUserId}?layout=badge` : '',
-      markdown: '',
-      copied: false,
+      src: initial.defaultUserId ? `/api/user/${initial.defaultUserId}?layout=badge` : "",
+      markdown: "",
+      rawUrl: "",
+      html: "",
     },
   });
-  let rawUrl = $state('');
+
+  let selectedLayout = $state<Layout>("standard");
   let previewOpacity = $state(1);
+  let isUpdating = $state(false);
+  let copied = $state<"md" | "url" | "html" | null>(null);
 
-  let lookupUsername = $state('');
+  let lookupUsername = $state("");
   let lookupLoading = $state(false);
-  let lookupError = $state('');
+  let lookupError = $state("");
+  let usernameFound = $state<string>("");
 
-  // Re-read window.__CONFIG__ after mount so SSR (empty placeholder) gets
-  // replaced by Express-injected runtime values.
   onMount(() => {
     const cfg = getConfig();
     if (cfg.defaultUserId && !userId) userId = cfg.defaultUserId;
@@ -67,15 +79,15 @@
     }
   });
 
-  // Track last fetched username to avoid redundant API calls.
-  let usernameCache: { id: string; username: string } = { id: '', username: '' };
+  let usernameCache = $state<{ id: string; username: string }>({ id: "", username: "" });
 
   async function generatePreview(silent = false) {
     if (!/^\d{17,}$/.test(userId)) {
-      if (!silent) alert('Please enter a valid Discord User ID.');
+      if (!silent) alert("Please enter a valid Discord User ID.");
       return;
     }
 
+    isUpdating = true;
     previewOpacity = 0.5;
 
     const state: PreviewState = {
@@ -87,27 +99,28 @@
       theme,
       nitroColors,
       customColors,
-      width,
+      width: width.toString(),
       overrideBanner,
       bannerUrl,
       bannerColor,
     };
 
     const urls: Record<Layout, string> = {
-      standard: buildPreviewUrl(state, 'standard'),
-      compact: buildPreviewUrl(state, 'compact'),
-      badge: buildPreviewUrl(state, 'badge'),
+      standard: buildPreviewUrl(state, "standard"),
+      compact: buildPreviewUrl(state, "compact"),
+      badge: buildPreviewUrl(state, "badge"),
     };
 
     try {
       let username = usernameCache.username;
       if (usernameCache.id !== userId) {
         const response = await fetch(`/api/username/${userId}`);
-        if (!response.ok) throw new Error('Failed to fetch username');
+        if (!response.ok) throw new Error("Failed to fetch username");
         const data = await response.json();
         username = data.username;
         usernameCache = { id: userId, username };
       }
+      usernameFound = username;
 
       const preloadImage = (src: string) =>
         new Promise<void>((resolve, reject) => {
@@ -116,64 +129,74 @@
           img.onerror = reject;
           img.src = src;
         });
-      await Promise.all([preloadImage(urls.standard), preloadImage(urls.compact), preloadImage(urls.badge)]);
+      await Promise.all([
+        preloadImage(urls.standard),
+        preloadImage(urls.compact),
+        preloadImage(urls.badge),
+      ]);
 
       const origin = window.location.origin;
-      const fullUrl = origin + urls.standard;
-      previews.standard.src = urls.standard;
-      previews.compact.src = urls.compact;
-      previews.badge.src = urls.badge;
-      previews.standard.markdown = `[![${username}'s Discord status](${origin + urls.standard})](${REPO_URL})`;
-      previews.compact.markdown = `[![${username}'s Discord status](${origin + urls.compact})](${REPO_URL})`;
-      previews.badge.markdown = `[![${username}'s Discord status badge](${origin + urls.badge})](${REPO_URL})`;
-      rawUrl = fullUrl;
+      (["standard", "compact", "badge"] as Layout[]).forEach((layout) => {
+        const full = origin + urls[layout];
+        const altSuffix =
+          layout === "badge"
+            ? " status badge"
+            : layout === "compact"
+              ? " Discord status"
+              : " Discord status";
+        previews[layout].src = urls[layout];
+        previews[layout].rawUrl = full;
+        previews[layout].markdown = `[![${username}'s${altSuffix}](${full})](${REPO_URL})`;
+        previews[layout].html =
+          `<a href="${REPO_URL}"><img src="${full}" alt="${username}'s${altSuffix}" /></a>`;
+      });
       previewOpacity = 1;
     } catch (error) {
-      console.error('Error:', error);
-      if (!silent) alert('Failed to generate preview. Please check the User ID and try again.');
+      console.error("Error:", error);
+      if (!silent) alert("Failed to generate preview. Please check the User ID and try again.");
       previewOpacity = 1;
+    } finally {
+      isUpdating = false;
     }
   }
 
-  async function copyLayoutUrl(layout: Layout) {
-    const md = previews[layout].markdown;
-    if (!md) return;
+  async function copyTo(kind: "md" | "url" | "html") {
+    const p = previews[selectedLayout];
+    const value = kind === "md" ? p.markdown : kind === "url" ? p.rawUrl : p.html;
+    if (!value) return;
     try {
-      await navigator.clipboard.writeText(md);
-      previews[layout].copied = true;
-      setTimeout(() => (previews[layout].copied = false), 2000);
+      await navigator.clipboard.writeText(value);
+      copied = kind;
+      setTimeout(() => (copied = null), 1800);
     } catch (err) {
-      console.error('Failed to copy:', err);
-      alert('Failed to copy URL');
+      console.error("Failed to copy:", err);
     }
   }
 
   async function handleUsernameLookup() {
     if (!lookupUsername || lookupUsername.length < 2) {
-      lookupError = 'Username must be at least 2 characters';
+      lookupError = "Username must be at least 2 characters";
       return;
     }
     lookupLoading = true;
-    lookupError = '';
+    lookupError = "";
     try {
       const response = await fetch(`/api/lookup/${encodeURIComponent(lookupUsername)}`);
       const data = await response.json();
       if (!response.ok) {
-        lookupError = data.error || 'User not found';
+        lookupError = data.error || "User not found";
         return;
       }
       userId = data.id;
-      lookupError = '';
-      lookupUsername = '';
+      lookupError = "";
     } catch (error) {
-      lookupError = 'Failed to lookup username';
+      lookupError = "Failed to lookup username";
     } finally {
       lookupLoading = false;
     }
   }
 
-  // Debounced auto-regenerate when any input changes. The `effect` reads all
-  // of the relevant state so Svelte tracks them as dependencies.
+  // Debounced auto-regenerate
   $effect(() => {
     void userId;
     void enableAboutMe;
@@ -197,225 +220,266 @@
     return () => clearTimeout(timeout);
   });
 
-  // Ctrl+Enter forces a non-silent refresh.
   function onKeydown(e: KeyboardEvent) {
-    if (e.ctrlKey && e.key === 'Enter') generatePreview(false);
+    if (e.ctrlKey && e.key === "Enter") generatePreview(false);
   }
+
+  const sliderPct = $derived(Math.round(((width - 128) / (2048 - 128)) * 100));
 </script>
 
 <svelte:window onkeydown={onKeydown} />
 
-<div class="max-w-[1100px] mx-auto">
-  <h1
-    class="text-discord-primary mb-8 text-3xl text-center font-bold relative inline-block left-1/2 -translate-x-1/2"
-  >
-    Discord Profile Preview Generator
-    <span
-      aria-hidden="true"
-      class="block h-[3px] w-[60px] bg-discord-primary mx-auto mt-2.5 rounded"
-    ></span>
-  </h1>
-
-  <div class="flex gap-6 mb-8 flex-wrap">
-    <div
-      class="flex-1 min-w-[300px] bg-discord-bg-secondary p-6 rounded-[var(--radius-discord)] border border-discord-border"
-    >
-      <p
-        class="bg-discord-warn text-black p-4 rounded-[var(--radius-discord)] mb-5 text-sm font-bold"
-      >
-        ⚠️ Before starting,
-        <a href={inviteUrl} target="_blank" rel="noreferrer" class="text-[#7d1010] underline">
-          join the Discord server
-        </a>
-        so the bot can access your profile information.
+<div class="panel p-6 md:p-8">
+  <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-6">
+    <!-- LEFT: configuration -->
+    <div>
+      
+      <h3 class="text-[15px] font-semibold mb-5">Who are you?</h3>
+      <p class="mb-2 border-2 border-brand-pink text-ink-dim rounded-sm p-3">
+        The bot needs to see you first!
+        <a
+          href={inviteUrl}
+          target="_blank"
+          rel="noreferrer"
+          class="text-brand-pink hover:underline">Join the server</a
+        >.
       </p>
+      <div class="mb-2 eyebrow text-[10px]">Discord username</div>
+      <form
+        onsubmit={(e) => {
+          e.preventDefault();
+          handleUsernameLookup();
+        }}
+        class="flex gap-2 mb-3"
+      >
+        <input
+          type="text"
+          value={lookupUsername}
+          oninput={(e) => (lookupUsername = (e.target as HTMLInputElement).value)}
+          placeholder="tsunibot"
+          class="field flex-1"
+        />
+        <button type="submit" disabled={lookupLoading} class="btn btn-primary px-4 py-2.5">
+          {lookupLoading ? "..." : "Look up"}
+        </button>
+      </form>
 
-      <div class="mb-6">
-        <span class="block mb-2 font-semibold text-discord-text-muted text-sm">
-          Lookup by username:
-        </span>
-        <form
-          onsubmit={(e) => {
-            e.preventDefault();
-            handleUsernameLookup();
-          }}
-          class="flex gap-2"
-        >
-          <input
-            type="text"
-            value={lookupUsername}
-            oninput={(e) => (lookupUsername = (e.target as HTMLInputElement).value)}
-            placeholder="Enter Discord username"
-            class="field-input flex-1 mb-0"
-          />
-          <button
-            type="submit"
-            disabled={lookupLoading}
-            class="btn-primary w-auto px-5 mb-0 whitespace-nowrap"
-          >
-            {lookupLoading ? 'Looking up...' : 'Lookup'}
-          </button>
-        </form>
-        {#if lookupError}
-          <div class="text-[#ff6b6b] text-[13px] mt-2">{lookupError}</div>
-        {/if}
-        <span class="block mb-2 mt-2 font-semibold text-discord-text-muted text-sm">
-          Or enter User ID
-        </span>
+      <div class="relative mb-1">
         <input
           type="text"
           value={userId}
           oninput={(e) => (userId = (e.target as HTMLInputElement).value)}
           placeholder="Discord User ID"
-          class="field-input"
+          class="field pr-20"
         />
+        {#if usernameFound && userId === usernameCache.id}
+          <span
+            class="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-0.5 rounded-sm text-[11px] font-medium flex items-center gap-1"
+            style="background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3);"
+          >
+            ✓ found
+          </span>
+        {/if}
       </div>
+      {#if lookupError}
+        <div class="text-[#f87171] text-[12px] mb-2">{lookupError}</div>
+      {/if}
 
-      <div class="mb-6">
-        <div class="flex items-center mb-3">
-          <input
-            type="checkbox"
-            id="enableAboutMe"
-            checked={enableAboutMe}
-            onchange={(e) => (enableAboutMe = (e.target as HTMLInputElement).checked)}
-            class="w-[18px] h-[18px] mr-2.5 cursor-pointer accent-discord-primary"
-          />
-          <label for="enableAboutMe" class="cursor-pointer">Enable About Me</label>
-        </div>
-
+      <h3 class="text-[15px] font-semibold mt-6 mb-4">What to show</h3>
+      <div class="space-y-3 mb-6">
+        {@render row(
+          "About Me section",
+          enableAboutMe,
+          (v) => (enableAboutMe = v),
+          enableAboutMe ? "on" : "off"
+        )}
         {#if enableAboutMe}
-          <span class="block mb-2 font-semibold text-discord-text-muted text-sm">About Me</span>
           <textarea
             value={aboutMe}
             oninput={(e) => (aboutMe = (e.target as HTMLTextAreaElement).value)}
-            placeholder="About me content..."
-            class="field-input min-h-[120px] resize-y"
+            placeholder="A short bio..."
+            class="field min-h-20 resize-y text-[13px]"
           ></textarea>
         {/if}
-
-        <div class="flex items-center mb-3">
-          <input
-            type="checkbox"
-            id="enableDecoration"
-            checked={enableDecoration}
-            onchange={(e) => (enableDecoration = (e.target as HTMLInputElement).checked)}
-            class="w-[18px] h-[18px] mr-2.5 cursor-pointer accent-discord-primary"
-          />
-          <label for="enableDecoration" class="cursor-pointer">Enable Avatar Decoration</label>
-        </div>
-
-        <div class="flex items-center mb-3">
-          <input
-            type="checkbox"
-            id="enableSpotify"
-            checked={enableSpotify}
-            onchange={(e) => (enableSpotify = (e.target as HTMLInputElement).checked)}
-            class="w-[18px] h-[18px] mr-2.5 cursor-pointer accent-discord-primary"
-          />
-          <label for="enableSpotify" class="cursor-pointer">Enable Spotify Activity</label>
-        </div>
-
-        <div class="flex items-center mb-3">
-          <input
-            type="checkbox"
-            id="overrideBanner"
-            checked={overrideBanner}
-            onchange={(e) => (overrideBanner = (e.target as HTMLInputElement).checked)}
-            class="w-[18px] h-[18px] mr-2.5 cursor-pointer accent-discord-primary"
-          />
-          <label for="overrideBanner" class="cursor-pointer">Override Banner</label>
-        </div>
-
+        {@render row(
+          "Avatar decoration",
+          enableDecoration,
+          (v) => (enableDecoration = v),
+          enableDecoration ? "ring" : "off"
+        )}
+        {@render row(
+          "Spotify activity",
+          enableSpotify,
+          (v) => (enableSpotify = v),
+          enableSpotify ? "live" : "off"
+        )}
+        {@render row(
+          "Override banner",
+          overrideBanner,
+          (v) => (overrideBanner = v),
+          overrideBanner ? "custom" : "default"
+        )}
         {#if overrideBanner}
-          <span class="block mb-2 font-semibold text-discord-text-muted text-sm">Banner URL</span>
-          <input
-            type="text"
-            value={bannerUrl}
-            oninput={(e) => (bannerUrl = (e.target as HTMLInputElement).value)}
-            placeholder="https://example.com/banner.png"
-            class="field-input"
-          />
-          <span class="block mb-2 font-semibold text-discord-text-muted text-sm">
-            Banner Color
-          </span>
-          <ColorInput value={bannerColor} onChange={(v) => (bannerColor = v)} />
+          <div class="pl-1">
+            <input
+              type="text"
+              value={bannerUrl}
+              oninput={(e) => (bannerUrl = (e.target as HTMLInputElement).value)}
+              placeholder="https://… (or use a color)"
+              class="field mb-2 text-[13px]"
+            />
+            <div class="flex items-center gap-2">
+              <ColorInput value={bannerColor} onChange={(v) => (bannerColor = v)} />
+              <span class="text-[12px] text-ink-mute">Banner color fallback</span>
+            </div>
+          </div>
         {/if}
       </div>
 
-      <ThemeSection
-        {theme}
-        setTheme={(v) => (theme = v)}
-        {nitroColors}
-        setNitroColors={(v) => (nitroColors = v)}
-        {customColors}
-        setCustomColors={(v) => (customColors = v)}
-      />
-
       <div class="mb-6">
-        <div class="mb-3">
-          <label for="widthInput" class="block mb-2 font-semibold text-discord-text-muted text-sm">
-            Image Width (px)
-          </label>
-          <input
-            type="number"
-            id="widthInput"
-            min="128"
-            max="2048"
-            step="1"
-            value={width}
-            oninput={(e) => (width = (e.target as HTMLInputElement).value)}
-            placeholder="Width in pixels"
-            class="field-input"
-          />
+        <ThemeSection
+          {theme}
+          setTheme={(v) => (theme = v)}
+          {nitroColors}
+          setNitroColors={(v) => (nitroColors = v)}
+          {customColors}
+          setCustomColors={(v) => (customColors = v)}
+        />
+      </div>
+
+      <div>
+        <div class="flex items-baseline justify-between mb-2">
+          <span class="text-[13px] font-semibold">Width</span>
+          <span class="text-[12px] text-ink-mute font-mono">{width}px</span>
         </div>
+        <input
+          type="range"
+          min="128"
+          max="2048"
+          step="8"
+          value={width}
+          oninput={(e) => (width = Number((e.target as HTMLInputElement).value))}
+          class="slider"
+          style:--slider-pct={`${sliderPct}%`}
+        />
       </div>
     </div>
 
-    <div
-      class="flex-1 min-w-[300px] bg-discord-bg-secondary p-6 rounded-[var(--radius-discord)] border border-discord-border self-start sticky top-5"
-    >
-      {#each [
-        { layout: 'standard' as Layout, label: 'Standard Layout', alt: 'Discord Profile Preview', badgeStyle: false },
-        { layout: 'compact' as Layout, label: 'Compact Layout', alt: 'Discord Profile Preview (Compact)', badgeStyle: false },
-        { layout: 'badge' as Layout, label: 'Badge Layout', alt: 'Discord Status Badge', badgeStyle: true },
-      ] as section (section.layout)}
-        <div class="mb-6">
-          <span class="block mb-2 font-semibold text-discord-text-muted text-sm">{section.label}</span>
-          <div
-            class="bg-discord-bg-tertiary p-5 rounded-[var(--radius-discord)] mb-2 border border-discord-border overflow-hidden"
+    <!-- RIGHT: preview -->
+    <div>
+      <h3 class="text-[15px] font-semibold mb-5">Live preview</h3>
+      <div class="grid grid-cols-1 gap-3 mb-3">
+        <button
+          type="button"
+          onclick={() => (selectedLayout = "standard")}
+          class="panel-inset p-4 text-left transition-all {selectedLayout === 'standard'
+            ? 'ring-2 ring-[rgba(167,139,250,0.5)]'
+            : 'hover:border-line-hi'}"
+        >
+          <div class="eyebrow mb-3">Standard</div>
+          {#if previews.standard.src}
+            <img
+              src={previews.standard.src}
+              alt="Standard preview"
+              style:opacity={previewOpacity}
+              class="h-auto mx-auto rounded-[8px] transition-opacity block"
+            />
+          {/if}
+        </button>
+
+        <div class="flex gap-3">
+          <button
+            type="button"
+            onclick={() => (selectedLayout = "compact")}
+            class="panel-inset p-4 text-left transition-all flex-1 {selectedLayout === 'compact'
+              ? 'ring-2 ring-[rgba(167,139,250,0.5)]'
+              : 'hover:border-line-hi'}"
           >
-            {#if previews[section.layout].src}
+            <div class="eyebrow mb-3">Compact</div>
+            {#if previews.compact.src}
               <img
-                src={previews[section.layout].src}
-                alt={section.alt}
+                src={previews.compact.src}
+                alt="Compact preview"
                 style:opacity={previewOpacity}
-                style:max-width={section.badgeStyle ? '50px' : '100%'}
-                class="h-auto rounded transition-opacity"
+                class="h-auto rounded-sm transition-opacity block"
               />
             {/if}
-          </div>
-          <div
-            class="bg-discord-input-bg p-4 rounded-[var(--radius-discord)] break-all border border-discord-border font-mono text-[13px] text-discord-text-muted"
-          >
-            {previews[section.layout].markdown}
-          </div>
+          </button>
           <button
-            onclick={() => copyLayoutUrl(section.layout)}
-            class="btn-primary mt-2 {previews[section.layout].copied ? 'btn-success' : ''}"
+            type="button"
+            onclick={() => (selectedLayout = "badge")}
+            class="panel-inset p-4 text-left transition-all {selectedLayout === 'badge'
+              ? 'ring-2 ring-[rgba(167,139,250,0.5)]'
+              : 'hover:border-line-hi'}"
           >
-            {previews[section.layout].copied ? 'Copied!' : 'Copy Markdown URL'}
+            <div class="eyebrow mb-3">Badge</div>
+            {#if previews.badge.src}
+              <img
+                src={previews.badge.src}
+                alt="Status badge"
+                style:opacity={previewOpacity}
+                class="h-auto rounded-[4px] transition-opacity block"
+                style:max-width="64px"
+              />
+            {/if}
           </button>
         </div>
-      {/each}
+      </div>
 
       <div>
-        <span class="block mb-2 font-semibold text-discord-text-muted text-sm">Raw URL</span>
-        <div
-          class="bg-discord-input-bg p-4 rounded-[var(--radius-discord)] break-all border border-discord-border font-mono text-[13px] text-discord-text-muted"
-        >
-          {rawUrl}
+        <div class="flex items-baseline flex-col gap-1 mb-2">
+          <span class="eyebrow">Markdown URL</span>
+          <span class="text-sm text-ink-mute">
+            for the <span class="text-ink-dim font-medium">{selectedLayout}</span> layout
+          </span>
+        </div>
+        <div class="code-box mb-3 min-h-11">
+          {previews[selectedLayout].markdown || "— select a user to see the markdown —"}
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <button
+            type="button"
+            onclick={() => copyTo("md")}
+            class="btn {copied === 'md' ? 'btn-success' : 'btn-primary'}"
+            disabled={!previews[selectedLayout].markdown}
+          >
+            {copied === "md" ? "Copied!" : "Copy Markdown"}
+          </button>
+          <button
+            type="button"
+            onclick={() => copyTo("url")}
+            class="btn {copied === 'url' ? 'btn-success' : ''}"
+            disabled={!previews[selectedLayout].rawUrl}
+          >
+            {copied === "url" ? "Copied!" : "Copy Raw URL"}
+          </button>
+          <button
+            type="button"
+            onclick={() => copyTo("html")}
+            class="btn {copied === 'html' ? 'btn-success' : ''}"
+            disabled={!previews[selectedLayout].html}
+          >
+            {copied === "html" ? "Copied!" : "HTML"}
+          </button>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+{#snippet row(label: string, value: boolean, set: (v: boolean) => void, badge: string)}
+  <label class="flex items-center justify-between gap-3 cursor-pointer select-none">
+    <span class="flex items-center gap-3">
+      <span class="toggle">
+        <input
+          type="checkbox"
+          checked={value}
+          onchange={(e) => set((e.target as HTMLInputElement).checked)}
+        />
+        <span class="track"><span class="thumb"></span></span>
+      </span>
+      <span class="text-[14px]">{label}</span>
+    </span>
+    <span class="text-[11px] font-mono uppercase tracking-wider text-ink-mute">{badge}</span>
+  </label>
+{/snippet}

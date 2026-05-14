@@ -1,26 +1,50 @@
 ---
-import App from '../components/App.svelte';
-import '../styles/global.css';
+import App from "../components/App.svelte";
+import "../styles/global.css";
+
+const REPO_URL = "https://github.com/the-snesler/discord-github-preview";
+
+const features = [
+  {
+    title: "Live presence",
+    body: "Online, idle, do not disturb, offline. Refreshes every time the image loads.",
+    icon: "pulse",
+  },
+  {
+    title: "Activity & Spotify",
+    body: "Anything that works with Rich Presence. Share your games, music, or coding for all to see.",
+    icon: "play",
+  },
+  {
+    title: "Themes",
+    body: "Dark, light, Nitro, Mocha, Dracula, Nord, Tokyo Night, GitHub, or custom.",
+    icon: "theme",
+  },
+  {
+    title: "About Me + decoration",
+    body: "An optional bio, your animated avatar ring, and your full banner.",
+    icon: "sparkle",
+  },
+];
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Discord Profile Preview Generator</title>
+    <title>discord-github-preview — a profile in your profile</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Generate live SVG previews of your Discord profile (status, activity, Spotify) for embedding in GitHub READMEs and personal websites."
+      content="Render your live Discord status as an SVG and drop it into your GitHub README. Live presence, activity, Spotify, custom themes."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
-    {/* Runtime config injected by Express via string substitution of this sentinel. */}
     <script is:inline>
       window.__CONFIG__ = /*__CONFIG__*/ {
         defaultUserName: "tsunibot",
@@ -29,7 +53,235 @@ import '../styles/global.css';
       } /*__CONFIG__*/;
     </script>
   </head>
-  <body class="px-5 py-8 leading-relaxed">
-    <App client:load />
+  <body>
+    <header class="max-w-300 mx-auto px-6 py-5 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2.5 group">
+        <span
+          class="w-7 h-7 rounded-[8px] grid place-items-center text-white text-[13px] font-bold"
+          style="background: linear-gradient(135deg, #f472b6, #a78bfa);">d</span
+        >
+        <span class="text-[14px] font-semibold tracking-tight">discord-github-preview</span>
+      </a>
+      <nav class="flex items-center gap-7 text-[14px] text-ink-dim">
+        <a href="#features" class="hover:text-white transition-colors">Docs</a>
+        <a
+          href={REPO_URL + "#self-hosting"}
+          target="_blank"
+          rel="noreferrer"
+          class="hover:text-white transition-colors">Self-host</a
+        >
+        <a
+          href={REPO_URL + "#customizations"}
+          target="_blank"
+          rel="noreferrer"
+          class="hover:text-white transition-colors">API</a
+        >
+        <a
+          href={REPO_URL}
+          target="_blank"
+          rel="noreferrer"
+          class="hover:text-white transition-colors">GitHub →</a
+        >
+      </nav>
+    </header>
+
+    <main>
+      <!-- HERO -->
+      <section class="max-w-275 mx-auto px-6 pt-12 pb-20 text-center">
+        <h1 class="mt-7 text-[64px] md:text-[80px] leading-[0.95] font-extrabold tracking-tight">
+          A profile<br />
+          <span class="gradient-text">in your profile.</span>
+        </h1>
+
+        <p class="mt-7 mx-auto max-w-140 text-[17px] leading-relaxed text-ink-dim">
+          Render your live Discord status as an SVG and drop it into your GitHub README. Always
+          online, even when you're touching grass.
+        </p>
+
+        <div class="mt-9 flex items-center justify-center gap-3">
+          <a href="#builder" class="btn btn-white">Build mine →</a>
+          <a href={REPO_URL} target="_blank" rel="noreferrer" class="btn">★ Star on GitHub</a>
+        </div>
+
+        <!-- Decorative 3D card stack -->
+        <div class="hero-stack mt-20 flex items-center justify-center gap-5">
+          <!-- Left card -->
+          <img
+            class="w-85"
+            style="transform: rotateY(22deg) rotateX(6deg) translateZ(-40px) translateY(20px);"
+            src="tsni@2x.png"
+          />
+          <!-- Center card (front) -->
+          <img
+            class="w-110 z-10"
+            style="transform: translateZ(40px) translateY(-10px);"
+            src="rho@2x.png"
+          />
+
+          <!-- Right card -->
+          <img
+            class="w-90"
+            style="transform: rotateY(-22deg) rotateX(6deg) translateZ(-40px) translateY(25px);"
+            src="kit@2x.png"
+          />
+        </div>
+      </section>
+    </main>
+
+    <!-- FEATURES -->
+    <section id="features" class="max-w-275 mx-auto px-6 pt-24 pb-16">
+      <div class="text-center mb-12">
+        <div class="eyebrow">What you get</div>
+        <h2
+          class="mt-3 text-[36px] md:text-[44px] font-bold leading-tight tracking-tight max-w-205 mx-auto"
+        >
+          Everything Discord shows your friends, anywhere you want.
+        </h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {
+          features.map((f) => (
+            <div class="panel p-5">
+              <div
+                class="w-9 h-9 rounded-[8px] grid place-items-center mb-4"
+                style={`background: ${
+                  f.icon === "pulse"
+                    ? "linear-gradient(135deg, rgba(52,211,153,0.25), rgba(16,185,129,0.1))"
+                    : f.icon === "play"
+                      ? "linear-gradient(135deg, rgba(244,114,182,0.25), rgba(167,139,250,0.1))"
+                      : f.icon === "theme"
+                        ? "linear-gradient(135deg, rgba(167,139,250,0.25), rgba(96,165,250,0.1))"
+                        : "linear-gradient(135deg, rgba(96,165,250,0.25), rgba(167,139,250,0.1))"
+                };`}
+              >
+                {f.icon === "pulse" && (
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#34d399"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <rect x="6" y="6" width="12" height="12" rx="2" />
+                  </svg>
+                )}
+                {f.icon === "play" && (
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#f472b6"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                )}
+                {f.icon === "theme" && (
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#a78bfa"
+                    stroke-width="2"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 3a9 9 0 0 0 0 18 9 9 0 0 1 0-18z" fill="#a78bfa" />
+                  </svg>
+                )}
+                {f.icon === "sparkle" && (
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#60a5fa"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M12 3l2 7 7 2-7 2-2 7-2-7-7-2 7-2z" />
+                  </svg>
+                )}
+              </div>
+              <h3 class="text-[16px] font-semibold mb-1.5">{f.title}</h3>
+              <p class="text-[13px] leading-relaxed text-ink-dim">{f.body}</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- BUILDER -->
+    <section id="builder" class="max-w-300 mx-auto px-6 pt-12 pb-20">
+      <div class="text-center mb-10">
+        <div class="eyebrow">Get yours</div>
+        <h2 class="mt-3 text-[36px] md:text-[44px] font-bold leading-tight tracking-tight">
+          Card Builder
+        </h2>
+      </div>
+      <App client:load />
+    </section>
   </body>
+
+  <footer class="border-t border-line mt-12">
+    <div class="max-w-300 mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-[1.5fr_1fr_1fr] gap-10">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <span
+            class="w-7 h-7 rounded-[8px] grid place-items-center text-white text-[13px] font-bold"
+            style="background: linear-gradient(135deg, #f472b6, #a78bfa);">d</span
+          >
+          <span class="text-[14px] font-semibold">discord-github-preview</span>
+        </div>
+        <p class="mt-3 text-[13px] leading-relaxed text-ink-dim max-w-90">
+          A small thing. Self-host with a Discord bot token. MIT licensed. Made by one person on a
+          coffee budget.
+        </p>
+      </div>
+      <div>
+        <div class="eyebrow mb-3">Project</div>
+        <ul class="space-y-2 text-[13px] text-ink-dim">
+          <li><a href={REPO_URL} class="hover:text-white transition-colors">GitHub repo</a></li>
+          <li>
+            <a href={REPO_URL + "#self-hosting"} class="hover:text-white transition-colors"
+              >Self-host guide</a
+            >
+          </li>
+          <li>
+            <a href={REPO_URL + "#api"} class="hover:text-white transition-colors">API reference</a>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <div class="eyebrow mb-3">Notes</div>
+        <ul class="space-y-2 text-[13px] text-ink-dim">
+          <li>
+            <a
+              href={REPO_URL + "#a-note-on-animated-avatars-banners-and-decorations"}
+              class="hover:text-white transition-colors">Animated avatars</a
+            >
+          </li>
+          <li>
+            <a
+              href={REPO_URL + "#how-to-get-your-discord-user-id"}
+              class="hover:text-white transition-colors">How to get your Discord User ID</a
+            >
+          </li>
+          <li>
+            <a
+              href={REPO_URL + "#url-parameter-customizations"}
+              class="hover:text-white transition-colors">Customizations</a
+            >
+          </li>
+        </ul>
+      </div>
+    </div>
+  </footer>
 </html>

@@ -58,7 +58,11 @@ app.use(express.static("./public"));
 app.get("/api/ping", discordSelf);
 app.get("/api/user/:id", cache(process.env.NODE_ENV === 'development' ? '1 second' : '30 seconds'), discordUser);
 app.get("/api/username/:id", cache(process.env.NODE_ENV === 'development' ? '1 second' : '30 seconds'), discordIDToUsername);
-app.get("/api/lookup/:username", discordUsernameToID);
+app.get(
+  "/api/lookup/:username",
+  cache(process.env.NODE_ENV === "development" ? "1 second" : "30 seconds"),
+  discordUsernameToID
+);
 app.get("/api/lanyard/:id", cache(process.env.NODE_ENV === 'development' ? '1 second' : '30 seconds'), pseudoLanyardImplementation);
 
 export default app;
