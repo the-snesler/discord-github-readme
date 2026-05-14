@@ -68,7 +68,10 @@ export const SVGCard: React.FC<SVGCardProps> = ({
               <rect x="5" y="5" width="690" height={totalHeight - 10} rx="30px" />
             </clipPath>
             <linearGradient id="nitroGradient" x1="0" y1="0" x2="0" y2="100%">
-              <stop offset="0%" style={{ stopColor: options.primaryColor }} />
+              <stop
+                offset={bannerHeight / totalHeight}
+                style={{ stopColor: options.primaryColor }}
+              />
               <stop offset="100%" style={{ stopColor: options.accentColor }} />
             </linearGradient>
             <linearGradient id="nitroOverlay" x1="0" y1="0" x2="0" y2="100%">
@@ -168,9 +171,14 @@ export const SVGCard: React.FC<SVGCardProps> = ({
       </g>
 
       {/* Discord Icon */}
-      <path fill="#7778" transform="translate(645 15) scale(0.3)" style={{ 
-        filter: "invert(1) grayscale(1) brightness(2)", 
-      }} d={discordPath} />
+      <path
+        fill="#7778"
+        transform="translate(645 15) scale(0.3)"
+        style={{
+          filter: "invert(1) grayscale(1) brightness(2)",
+        }}
+        d={discordPath}
+      />
 
       {displayables.map((displayable, index) => {
         const { props, render: Render } = displayable;

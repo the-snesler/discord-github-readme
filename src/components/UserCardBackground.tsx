@@ -39,7 +39,6 @@ export default function cardBackground({
             <circle cx="100" cy={bannerHeight} r="93" fill="white" />
             <rect
               x="5"
-              rx={banner ? 0 : 5}
               y={bannerHeight}
               width="690"
               height={totalHeight - bannerHeight - 5}
@@ -59,6 +58,15 @@ export default function cardBackground({
               <circle cx="100" cy={bannerHeight} r="93" fill="black" />
             </mask>
             <g mask="url(#banner)">
+              <rect
+                x="5"
+                y="5"
+                width="690"
+                height={bannerHeight}
+                style={{
+                  fill: bannerFill,
+                }}
+              />
               {banner && (
                 <image
                   x="5"
