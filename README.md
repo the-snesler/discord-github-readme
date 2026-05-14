@@ -69,6 +69,22 @@ You can customize your profile preview in two ways:
     <img src="https://dsc-readme.tsuni.dev/api/user/214167454291722241?width=300">
   </p>
 
+- **Layouts:** use the `layout` parameter to change the layout of the profile. The default is... well, `default`, but you can also choose from:
+  - `compact`: a one-line layout that only shows the profile picture, username, and a single current activity (prioritized: rich presence > spotify > others > custom status).
+  - `badge`: an even more minimal layout that only shows the profile picture and a small badge indicating the online status. This is ideal for very small embeds where you just want to show that you're online without taking up much space.
+
+Compact
+```md
+![](https://dsc-readme.tsuni.dev/api/user/214167454291722241?layout=compact&width=400)
+```
+![](https://dsc-readme.tsuni.dev/api/user/214167454291722241?layout=compact&width=400)
+
+Badge
+```md
+![](https://dsc-readme.tsuni.dev/api/user/214167454291722241?layout=badge&width=400)
+```
+![](https://dsc-readme.tsuni.dev/api/user/214167454291722241?layout=badge&width=400)
+
 - **Change the banner:** provide an image URL after your user ID, for example:
 
 ```md
@@ -109,13 +125,23 @@ You can customize your profile preview in two ways:
 ```
 
 - **Theme Customizations**
-  - Set the theme via the `theme` parameter, choosing one of: `dark`, `light`, `nitroDark`, `nitroLight`, or `custom`.
+  - Set the theme via the `theme` parameter, choosing one of: `dark`, `light`, `nitroDark`, `nitroLight`, one of the custom themes presets mentioned below, or `custom`.
   - For **Nitro themes** (`nitroDark` or `nitroLight`):
     - Use the parameters `primaryColor` and `accentColor` with hex values provided **without** a `#`.  
       Example:
       ```md
       ![](https://dsc-readme.tsuni.dev/api/user/214167454291722241?theme=nitroDark&primaryColor=5865F2&accentColor=99AAB5&width=400)
       ```
+  - **Custom theme presets**:
+    - `catppuccinMocha`
+    - `catppuccinLatte`
+    - `catppuccinFrappe`
+    - `dracula`
+    - `nord`
+    - `tokyoNight`
+    - `githubDark`
+    - `gruvbox`
+    - `solarized`
   - For the **Custom theme**:
     - Use the parameters `colorB1`, `colorB2`, `colorB3`, `colorT1`, and `colorT2` with hex values provided **without** a `#`.  
       Example:
@@ -138,6 +164,15 @@ Animated avatars, banners, and decorations **will not animate on GitHub**, most 
 ```
 
 Obviously, this will only work on platforms where you can write HTML, like your personal website. GitHub does not allow `<object>` tags in Markdown. Additionally, embedding animated images significantly increases the filesize of the resulting SVG, resulting in slower load times and more work for my server. So really think about whether this needs to be turned on!
+
+## API
+
+The app features a few API endpoints beyond the main `/api/user/:id` endpoint that generates the SVG.
+
+- `/api/user/:id`: You can, as you'd expect, generate an SVG programmatically. For all the possible options, read the above [customization options](#customizations).
+- `/api/lookup/:username`: You can lookup a user ID by their username (either platform username, display name, or guild nickname). This is used in the web UI.
+- `/api/username/:id`: Conversely, you can get a username by their user ID. This is also used in the web UI to populate the alt text of the profile picture.
+- `/api/lanyard/:id`: This endpoint mimics the [Lanyard](https://github.com/Phineas/lanyard) API response format, without the bells and whistles (socket mode, KV store, etc). There isn't any real reason to use this over the actual Lanyard API... but hey, it's there if you want it!
 
 ## Self-Hosting
 
