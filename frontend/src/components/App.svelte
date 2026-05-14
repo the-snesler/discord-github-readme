@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import ColorInput from "./ColorInput.svelte";
   import ThemeSection from "./ThemeSection.svelte";
+  import GithubGuide from "./GithubGuide.svelte";
   import {
     buildPreviewUrl,
     type Theme,
@@ -466,6 +467,8 @@
     </div>
   </div>
 </div>
+
+<GithubGuide markdown={previews[selectedLayout].markdown} {selectedLayout} />
 
 {#snippet row(label: string, value: boolean, set: (v: boolean) => void, badge: string)}
   <label class="flex items-center justify-between gap-3 cursor-pointer select-none">
