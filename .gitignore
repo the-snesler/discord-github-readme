@@ -23,10 +23,8 @@ dist/
 # Frontend build artifacts #
 frontend/dist/
 frontend/.astro/
-public/index.html
-public/_astro/
-public/content-assets.mjs
-public/content-modules.mjs
+public/*
+!public/favicon.svg
 
 # IDE #
 .idea/
