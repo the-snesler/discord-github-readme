@@ -16,6 +16,7 @@
   let userId = $state(initial.defaultUserId);
   let inviteUrl = $state(initial.inviteUrl);
 
+  let pronouns = $state("");
   let enableAboutMe = $state(false);
   let aboutMe = $state("");
   let enableDecoration = $state(true);
@@ -93,6 +94,7 @@
 
     const state: PreviewState = {
       userId,
+      pronouns,
       enableAboutMe,
       aboutMe,
       enableDecoration,
@@ -200,6 +202,7 @@
   // Debounced auto-regenerate
   $effect(() => {
     void userId;
+    void pronouns;
     void enableAboutMe;
     void aboutMe;
     void enableDecoration;
@@ -287,6 +290,15 @@
       {/if}
 
       <h3 class="text-[15px] font-semibold mt-6 mb-4">What to show</h3>
+      <div class="eyebrow text-[10px] mb-2">Pronouns</div>
+      <input
+        type="text"
+        value={pronouns}
+        oninput={(e) => (pronouns = (e.target as HTMLInputElement).value)}
+        placeholder="e.g. they/them"
+        maxlength={30}
+        class="field mb-3 text-[13px]"
+      />
       <div class="space-y-3 mb-6">
         {@render row(
           "About Me section",

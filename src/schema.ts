@@ -20,6 +20,7 @@ export const ParamsSchema = z
       .transform((val) => "#" + val)
       .optional(),
     aboutMe: z.string().optional(),
+    pronouns: z.string().max(30).optional(),
     hideDecoration: z.coerce.boolean().default(false),
     hideSpotify: z.coerce.boolean().default(false),
     layout: z.enum(["standard", "compact", "badge"]).default("standard"),

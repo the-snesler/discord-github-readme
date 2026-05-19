@@ -32,7 +32,7 @@ export const name: DisplayableComponent<NameServerProps> = {
 
     return { clanBadge, badges };
   },
-  render: ({ user, colors, y, bannerHeight, serverProp }) => {
+  render: ({ user, options, colors, y, bannerHeight, serverProp }) => {
     const { clanBadge, badges } = serverProp || { clanBadge: null, badges: [] };
 
     // Calculate approximate width of display name for badge positioning
@@ -68,7 +68,10 @@ export const name: DisplayableComponent<NameServerProps> = {
               alignItems: "center",
             }}
           >
-            {user.username}
+            <span>
+              {user.username}
+              {options.pronouns && ` \u2022 ${options.pronouns}`}
+            </span>
             {clanBadge && (
               <span
                 style={{

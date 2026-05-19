@@ -36,6 +36,7 @@ export interface PreviewState {
   theme: Theme;
   nitroColors: NitroColors;
   customColors: CustomColors;
+  pronouns: string;
   width: string;
   overrideBanner: boolean;
   bannerUrl: string;
@@ -51,6 +52,9 @@ export function buildPreviewUrl(state: PreviewState, layout: Layout = 'standard'
 
   if (state.enableAboutMe && state.aboutMe) {
     params.append('aboutMe', state.aboutMe);
+  }
+  if (state.pronouns) {
+    params.append('pronouns', state.pronouns);
   }
   if (state.overrideBanner && state.bannerUrl) {
     params.append('banner', state.bannerUrl);
