@@ -1,13 +1,19 @@
 import express from "express";
-import apicache from "apicache";
 import { promises as fs } from "fs";
 import path from "path";
-import { discordSelf, discordUser, discordIDToUsername, discordUsernameToID, pseudoLanyardImplementation } from "./api";
+import {
+  discordSelf,
+  discordUser,
+  discordIDToUsername,
+  discordUsernameToID,
+  pseudoLanyardImplementation,
+  resolveUsernameToId,
+} from "./api";
 import 'dotenv/config';
 import readyClient from "./bot";
+import { withResponseCache } from "./helpers/responseCache";
 
 const app = express();
-const cache = apicache.middleware;
 
 let fallbackUserId = "879917497959219250";
 let fallbackUserName = "tsunibot";
@@ -55,14 +61,17 @@ app.get("/", async (_req, res) => {
 
 app.use(express.static("./public"));
 
+const idFromParams = (req: express.Request) => req.params.id ?? null;
+
 app.get("/api/ping", discordSelf);
-app.get("/api/user/:id", cache(process.env.NODE_ENV === 'development' ? '1 second' : '30 seconds'), discordUser);
-app.get("/api/username/:id", cache(process.env.NODE_ENV === 'development' ? '1 second' : '30 seconds'), discordIDToUsername);
+app.get("/api/user/:id", withResponseCache(discordUser, { userIdFor: idFromParams }));
+app.get("/api/username/:id", withResponseCache(discordIDToUsername, { userIdFor: idFromParams }));
 app.get(
   "/api/lookup/:username",
-  cache(process.env.NODE_ENV === "development" ? "1 second" : "30 seconds"),
-  discordUsernameToID
+  withResponseCache(discordUsernameToID, {
+    userIdFor: (req) => resolveUsernameToId(req.params.username),
+  })
 );
-app.get("/api/lanyard/:id", cache(process.env.NODE_ENV === 'development' ? '1 second' : '30 seconds'), pseudoLanyardImplementation);
+app.get("/api/lanyard/:id", withResponseCache(pseudoLanyardImplementation, { userIdFor: idFromParams }));
 
 export default app;
