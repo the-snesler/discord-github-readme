@@ -7,6 +7,30 @@ import { ParamsSchema } from "../schema";
 import type { CardOptions } from "../schema";
 import { discordMemberToLanyard } from "../helpers/lanyard";
 
+const lookupGuildMemberByUsername = (
+  client: Awaited<typeof readyClient>,
+  rawUsername: string
+) => {
+  const guildID = process.env.DISCORD_GUILD_ID as string;
+  const guild = client.guilds.cache.get(guildID);
+  if (!guild) return null;
+  const searchTerm = rawUsername.replace(/^@/, "").toLowerCase();
+  return (
+    guild.members.cache.find(
+      (m) =>
+        m.user.username.toLowerCase() === searchTerm ||
+        m.user.displayName.toLowerCase() === searchTerm ||
+        m.nickname?.toLowerCase() === searchTerm
+    ) || null
+  );
+};
+
+export const resolveUsernameToId = async (username: string): Promise<string | null> => {
+  if (!username || username.length < 2) return null;
+  const client = await readyClient;
+  return lookupGuildMemberByUsername(client, username)?.id ?? null;
+};
+
 export const discordSelf: RequestHandler = async (req, res, next) => {
   const client = await readyClient;
   res.status(200).send(`Discord logged in as ${client.user.username}`);
@@ -130,21 +154,12 @@ export const discordUsernameToID: RequestHandler = async (req, res, next) => {
 
   try {
     const guildID = process.env.DISCORD_GUILD_ID as string;
-    const guild = client.guilds.cache.get(guildID);
-
-    if (!guild) {
+    if (!client.guilds.cache.get(guildID)) {
       res.status(500).json({ error: "Guild not found" });
       return;
     }
 
-    // Search by username or display name (case-insensitive)
-    // Remove @ if present
-    const searchTerm = username.replace(/^@/, '').toLowerCase();
-    const member = guild.members.cache.find(m =>
-      m.user.username.toLowerCase() === searchTerm ||
-      m.user.displayName.toLowerCase() === searchTerm ||
-      m.nickname?.toLowerCase() === searchTerm
-    );
+    const member = lookupGuildMemberByUsername(client, username);
 
     if (!member) {
       res.status(404).json({ error: "User not found in server" });
