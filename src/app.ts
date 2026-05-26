@@ -37,7 +37,7 @@ fs.readFile(INDEX_PATH, "utf8")
   });
 
 app.get("/", async (_req, res) => {
-  if (!indexHtml) {
+  if (!indexHtml || process.env.NODE_ENV === "development") {
     // Lazy re-read in case the build finished after server start (e.g. dev).
     try {
       indexHtml = await fs.readFile(INDEX_PATH, "utf8");
