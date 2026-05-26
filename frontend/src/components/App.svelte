@@ -249,7 +249,7 @@
 <svelte:window onkeydown={onKeydown} />
 
 <div class="panel p-6 md:p-8">
-  <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-6">
+  <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-6 place-items-start">
     <!-- LEFT: configuration -->
     <div>
       
@@ -407,9 +407,9 @@
     </div>
 
     <!-- RIGHT: preview -->
-    <div>
+    <div class="top-0 sticky">
       <h3 class="text-[15px] font-semibold mb-5">Live preview</h3>
-      <div class="grid grid-cols-1 gap-3 mb-3">
+      <div class="flex flex-col gap-3 mb-3">
         <button
           type="button"
           onclick={() => (selectedLayout = "standard")}

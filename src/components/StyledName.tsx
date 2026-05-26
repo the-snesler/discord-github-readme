@@ -15,9 +15,9 @@ interface StyledNameProps {
 }
 
 const NEON_BLUR = 4;
-const TOON_STROKE = 6;
-const POP_STROKE = 4;
-const POP_OFFSET = { x: 4, y: 6 };
+const TOON_STROKE = 3;
+const POP_STROKE = 2;
+const POP_OFFSET = { x: 0, y: 3 };
 
 export const StyledName: React.FC<StyledNameProps> = ({
   text,
