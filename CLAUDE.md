@@ -55,9 +55,22 @@ pnpm clean            # Remove dist/ directory
 
 ### Testing & Quality
 ```bash
-pnpm test             # Run Jest test suite
+pnpm test             # Run Jest test suite (hits real Discord via the bot)
 pnpm lint             # Run ESLint on TypeScript files
+pnpm exec tsc --noEmit                              # Backend type-check
+cd frontend && pnpm exec astro-check                # Frontend type-check
 ```
+
+### Verifying SVG changes
+The SVG output is self-contained — fonts are inlined as base64 woff2, gradients/filters live in `<defs>`, all images are base64 — so any browser opening the raw `.svg` will render exactly what GitHub will render. Skip headless-chromium-driving the frontend just to look at the card.
+
+Instead, with `pnpm dev` running:
+```bash
+curl -s "http://localhost:3000/api/user/$DEFAULT_USER_ID?font=8bit&effect=neon&nameColor1=00ffff" > /tmp/card.svg
+# Open /tmp/card.svg in any browser, or grep its content:
+grep -oE 'name-grad-|name-neon-|font-family[^;]*' /tmp/card.svg | head
+```
+The frontend is just a URL builder around `/api/user/:id`; if a parameter works via curl it'll work in the UI too. Only screenshot the svelte page when you're actually verifying the picker UI itself (selection state, layout, the new color preset row, etc.).
 
 ### Docker
 ```bash
