@@ -199,3 +199,14 @@ If you prefer to host your own instance, follow these steps:
 6. Visit `http://localhost:3000` to access the web interface
 
 You can substitute `pnpm` with `npm` or `yarn` if you prefer.
+
+### Adding a display-name font
+
+Display-name fonts live in `src/fonts/` as paired files: `<slug>.woff2` (full font) and `<slug>-subset.woff2` (printable ASCII subset). The renderer picks the subset when the user's display name is pure ASCII, else falls back to the full font.
+
+To add a new font:
+
+1. Pick one weight (usually Bold) and convert it to woff2, e.g. `pyftsubset MyFont-Bold.ttf --unicodes='U+0000-10FFFF' --flavor=woff2 --output-file=src/fonts/myslug.woff2`
+2. Generate the ASCII subset with [glyphhanger](https://github.com/zachleat/glyphhanger): `glyphhanger --US_ASCII --formats=woff2 --subset=src/fonts/myslug.woff2` (produces `src/fonts/myslug-subset.woff2`)
+3. Copy `myslug.woff2` (full version only) into `frontend/public/fonts/` so the picker tile can render it in the browser
+4. Add `myslug` to the `font` enum in `src/schema.ts`, the `Font` type in `frontend/src/lib/buildPreviewUrl.ts`, the `nameFonts` map in `src/helpers/fonts.ts`, the `fontTiles` array in `frontend/src/components/NameStyleSection.svelte`, and the `@font-face` block at the top of that same component

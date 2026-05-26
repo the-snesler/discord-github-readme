@@ -14,6 +14,18 @@ export type Theme =
   | 'gruvbox'
   | 'solarized';
 
+export type Font =
+  | 'ggsans'
+  | 'tempo'
+  | 'sakura'
+  | 'jellybean'
+  | 'modern'
+  | 'medieval'
+  | '8bit'
+  | 'vampyre';
+
+export type Effect = 'solid' | 'gradient' | 'neon' | 'toon' | 'pop';
+
 export interface NitroColors {
   primary: string;
   accent: string;
@@ -41,6 +53,10 @@ export interface PreviewState {
   overrideBanner: boolean;
   bannerUrl: string;
   bannerColor: string;
+  font: Font;
+  effect: Effect;
+  nameColor1: string;
+  nameColor2: string;
 }
 
 const stripHash = (c: string) => c.replace(/^#/, '');
@@ -83,6 +99,19 @@ export function buildPreviewUrl(state: PreviewState, layout: Layout = 'standard'
 
   if (state.width) {
     params.append('width', state.width.toString());
+  }
+
+  if (state.font && state.font !== 'ggsans') {
+    params.append('font', state.font);
+  }
+  if (state.effect && state.effect !== 'solid') {
+    params.append('effect', state.effect);
+  }
+  if (state.nameColor1) {
+    params.append('nameColor1', stripHash(state.nameColor1));
+  }
+  if (state.effect === 'gradient' && state.nameColor2) {
+    params.append('nameColor2', stripHash(state.nameColor2));
   }
 
   if (layout !== 'standard') {

@@ -2,12 +2,15 @@
   import { onMount } from "svelte";
   import ColorInput from "./ColorInput.svelte";
   import ThemeSection from "./ThemeSection.svelte";
+  import NameStyleSection from "./NameStyleSection.svelte";
   import GithubGuide from "./GithubGuide.svelte";
   import {
     buildPreviewUrl,
     type Theme,
     type PreviewState,
     type Layout,
+    type Font,
+    type Effect,
   } from "../lib/buildPreviewUrl";
   import { getConfig } from "../lib/config";
 
@@ -34,6 +37,10 @@
   let overrideBanner = $state(false);
   let bannerUrl = $state("");
   let bannerColor = $state("#000000");
+  let font = $state<Font>("ggsans");
+  let effect = $state<Effect>("solid");
+  let nameColor1 = $state("");
+  let nameColor2 = $state("");
 
   const REPO_URL = "https://github.com/the-snesler/discord-github-preview";
 
@@ -106,6 +113,10 @@
       overrideBanner,
       bannerUrl,
       bannerColor,
+      font,
+      effect,
+      nameColor1,
+      nameColor2,
     };
 
     const urls: Record<Layout, string> = {
@@ -219,6 +230,10 @@
     void overrideBanner;
     void bannerUrl;
     void bannerColor;
+    void font;
+    void effect;
+    void nameColor1;
+    void nameColor2;
 
     const timeout = setTimeout(() => generatePreview(true), 500);
     return () => clearTimeout(timeout);
@@ -357,6 +372,19 @@
           setNitroColors={(v) => (nitroColors = v)}
           {customColors}
           setCustomColors={(v) => (customColors = v)}
+        />
+      </div>
+
+      <div class="mb-6">
+        <NameStyleSection
+          {font}
+          setFont={(v) => (font = v)}
+          {effect}
+          setEffect={(v) => (effect = v)}
+          {nameColor1}
+          setNameColor1={(v) => (nameColor1 = v)}
+          {nameColor2}
+          setNameColor2={(v) => (nameColor2 = v)}
         />
       </div>
 

@@ -2,7 +2,7 @@ import React from "react";
 import { UserProperties } from "../helpers/discord";
 import { BakedDisplayableComponent, CardOptions, ColorTheme } from "../types";
 import { mixColors, setOpacity } from "../helpers/utils";
-import { GG_SANS_FONT_FACE } from "../helpers/fonts";
+import { GG_SANS_FONT_FACE, buildNameFontFace } from "../helpers/fonts";
 import { statusColors } from "../helpers/themes";
 import { bannerHeight, isNitroProfile } from "../helpers/card";
 import UserCardBackground from "./UserCardBackground";
@@ -58,7 +58,7 @@ export const SVGCard: React.FC<SVGCardProps> = ({
     >
       <title>{`${user.username} on Discord`}</title>
       <defs>
-        <style>{GG_SANS_FONT_FACE}</style>
+        <style>{GG_SANS_FONT_FACE + buildNameFontFace(options.font, user.displayName)}</style>
         <clipPath id="background">
           <rect x="0" y="0" width="700" height={totalHeight} rx="35px" />
         </clipPath>

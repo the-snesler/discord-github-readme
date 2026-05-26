@@ -78,6 +78,20 @@ export const ParamsSchema = z
       .default("d2d6d8")
       .refine(isHex, hexMessage)
       .transform((val) => "#" + val),
+    font: z
+      .enum(["ggsans", "tempo", "sakura", "jellybean", "modern", "medieval", "8bit", "vampyre"])
+      .default("ggsans"),
+    effect: z.enum(["solid", "gradient", "neon", "toon", "pop"]).default("solid"),
+    nameColor1: z
+      .string()
+      .refine(isHex, hexMessage)
+      .transform((val) => "#" + val)
+      .optional(),
+    nameColor2: z
+      .string()
+      .refine(isHex, hexMessage)
+      .transform((val) => "#" + val)
+      .optional(),
   })
   .check((ctx) => {
     const data = ctx.value;

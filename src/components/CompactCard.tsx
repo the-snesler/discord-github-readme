@@ -1,8 +1,9 @@
 import React from "react";
 import { UserProperties } from "../helpers/discord";
 import { CardOptions, ColorTheme } from "../types";
-import { GG_SANS_FONT_FACE } from "../helpers/fonts";
+import { GG_SANS_FONT_FACE, buildNameFontFace } from "../helpers/fonts";
 import { statusColors } from "../helpers/themes";
+import { StyledName } from "./StyledName";
 
 interface CompactCardProps {
   user: UserProperties;
@@ -44,7 +45,7 @@ export const CompactCard: React.FC<CompactCardProps> = ({
     >
       <title>{`${user.username} on Discord`}</title>
       <defs>
-        <style>{GG_SANS_FONT_FACE}</style>
+        <style>{GG_SANS_FONT_FACE + buildNameFontFace(options.font, user.displayName || user.username)}</style>
         <clipPath id="compact-bg">
           <rect x="0" y="0" width="500" height="64" rx="16" />
         </clipPath>
@@ -97,16 +98,16 @@ export const CompactCard: React.FC<CompactCardProps> = ({
       />
 
       {/* Display name */}
-      <text
-        x="62"
-        y="26"
-        fontFamily="'gg sans', 'Noto Sans', Arial, sans-serif"
-        fontSize="18"
-        fontWeight="800"
-        fill={colors.colorT1}
-      >
-        {user.displayName || user.username}
-      </text>
+      <StyledName
+        text={user.displayName || user.username}
+        options={options}
+        colors={colors}
+        x={62}
+        y={26}
+        fontSize={18}
+        fontWeight={800}
+        idKey="compact"
+      />
 
       {/* Username + activity */}
       <text

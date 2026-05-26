@@ -3,6 +3,7 @@ import { DisplayableComponent } from "../types";
 import { fontFamily } from "../helpers/fonts";
 import { URItoBase64 } from "../helpers/utils";
 import { getDisplayableBadges, BadgeName } from "../helpers/badges";
+import { StyledName } from "../components/StyledName";
 import * as path from "path";
 import * as fs from "fs/promises";
 
@@ -42,19 +43,16 @@ export const name: DisplayableComponent<NameServerProps> = {
 
     return (
       <g>
-        <text
-          style={{
-            fill: colors.colorT1,
-            fontFamily: fontFamily,
-            fontSize: "44px",
-            fontWeight: 800,
-            whiteSpace: "pre",
-          }}
-          x="40"
+        <StyledName
+          text={user.displayName}
+          options={options}
+          colors={colors}
+          x={40}
           y={y + bannerHeight + 93 + 40}
-        >
-          {user.displayName}
-        </text>
+          fontSize={44}
+          fontWeight={800}
+          idKey="standard"
+        />
         <foreignObject x={40} y={y + bannerHeight + 93 + 50} height={40} width={620}>
           <div
             // @ts-ignore
