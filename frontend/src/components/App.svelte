@@ -19,11 +19,13 @@
   let userId = $state(initial.defaultUserId);
   let inviteUrl = $state(initial.inviteUrl);
 
+  let pronounsEnabled = $state(false);
   let pronouns = $state("");
   let enableAboutMe = $state(false);
   let aboutMe = $state("");
   let enableDecoration = $state(true);
   let enableSpotify = $state(true);
+  let enableAnimation = $state(true);
   let theme = $state<Theme>("dark");
   let nitroColors = $state({ primary: "#8180ff", accent: "#fe80c0" });
   let customColors = $state({
@@ -106,6 +108,7 @@
       aboutMe,
       enableDecoration,
       enableSpotify,
+      enableAnimation,
       theme,
       nitroColors,
       customColors,
@@ -218,6 +221,7 @@
     void aboutMe;
     void enableDecoration;
     void enableSpotify;
+    void enableAnimation;
     void theme;
     void nitroColors.primary;
     void nitroColors.accent;
@@ -305,18 +309,42 @@
       {/if}
 
       <h3 class="text-[15px] font-semibold mt-6 mb-4">What to show</h3>
-      <div class="eyebrow text-[10px] mb-2">Pronouns</div>
-      <input
-        type="text"
-        value={pronouns}
-        oninput={(e) => (pronouns = (e.target as HTMLInputElement).value)}
-        placeholder="e.g. they/them"
-        maxlength={30}
-        class="field mb-3 text-[13px]"
-      />
       <div class="space-y-3 mb-6">
         {@render row(
-          "About Me section",
+          "Animation",
+          enableAnimation,
+          (v) => (enableAnimation = v),
+          enableAnimation ? "enabled" : "disabled"
+        )}
+        {@render row(
+          "Spotify activity",
+          enableSpotify,
+          (v) => (enableSpotify = v),
+          enableSpotify ? "visible" : "hidden"
+        )}
+        {@render row(
+          "Avatar decoration",
+          enableDecoration,
+          (v) => (enableDecoration = v),
+          enableDecoration ? "on" : "off"
+        )}
+        {@render row(
+          "Pronouns",
+          pronounsEnabled,
+          (v) => (pronounsEnabled = v),
+          pronounsEnabled ? "on" : "off"
+        )}
+        {#if pronounsEnabled}
+          <input
+            type="text"
+            value={pronouns}
+            oninput={(e) => (pronouns = (e.target as HTMLInputElement).value)}
+            placeholder="they/them"
+            class="field text-[13px]"
+          />
+        {/if}
+        {@render row(
+          "About Me",
           enableAboutMe,
           (v) => (enableAboutMe = v),
           enableAboutMe ? "on" : "off"
@@ -329,18 +357,6 @@
             class="field min-h-20 resize-y text-[13px]"
           ></textarea>
         {/if}
-        {@render row(
-          "Avatar decoration",
-          enableDecoration,
-          (v) => (enableDecoration = v),
-          enableDecoration ? "ring" : "off"
-        )}
-        {@render row(
-          "Spotify activity",
-          enableSpotify,
-          (v) => (enableSpotify = v),
-          enableSpotify ? "live" : "off"
-        )}
         {@render row(
           "Override banner",
           overrideBanner,

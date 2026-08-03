@@ -45,6 +45,7 @@ export interface PreviewState {
   aboutMe: string;
   enableDecoration: boolean;
   enableSpotify: boolean;
+  enableAnimation: boolean;
   theme: Theme;
   nitroColors: NitroColors;
   customColors: CustomColors;
@@ -82,6 +83,9 @@ export function buildPreviewUrl(state: PreviewState, layout: Layout = 'standard'
   }
   if (!state.enableSpotify) {
     params.append('hideSpotify', 'true');
+  }
+  if (!state.enableAnimation) {
+    params.append("animate", "false");
   }
 
   params.append('theme', state.theme);
