@@ -10,19 +10,15 @@ interface Props {
   banner: string | null;
   user: UserProperties;
 }
-export default function cardBackground({
-  colors,
-  options,
-  totalHeight,
-  banner,
-  user,
-}: Props) {
+export default function CardBackground({ colors, options, totalHeight, banner, user }: Props) {
   const bgColor = colors.colorB1;
   const nitro = isNitroProfile(options.theme);
-  const bannerFill = banner ? colors.colorB2 : 
-    options.bannerColor ? options.bannerColor :
-    user.accentColor || bgColor;
-  
+  const bannerFill = banner
+    ? colors.colorB2
+    : options.bannerColor
+      ? options.bannerColor
+      : user.accentColor || bgColor;
+
   if (nitro) {
     return (
       <g>
@@ -67,16 +63,6 @@ export default function cardBackground({
                   fill: bannerFill,
                 }}
               />
-              {banner && (
-                <image
-                  x="5"
-                  y="5"
-                  xlinkHref={banner}
-                  height={bannerHeight - 5}
-                  width={690}
-                  preserveAspectRatio="xMidYMid slice"
-                />
-              )}
             </g>
           </g>
         </g>
@@ -102,14 +88,6 @@ export default function cardBackground({
                   fill: bannerFill,
                 }}
               />
-              {banner && (
-                <image
-                  xlinkHref={banner}
-                  height={bannerHeight}
-                  width={700}
-                  preserveAspectRatio="xMidYMid slice"
-                />
-              )}
             </g>
           </g>
         </g>
