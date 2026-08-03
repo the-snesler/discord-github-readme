@@ -107,20 +107,20 @@ const features = [
         <div class="hero-stack mt-20 flex items-center justify-center gap-5">
           <!-- Left card -->
           <img
-            class="w-85"
+            class="stack-card stack-card-left w-85"
             style="transform: rotateY(22deg) rotateX(6deg) translateZ(-40px) translateY(20px);"
             src="tsni@2x.png"
           />
           <!-- Center card (front) -->
           <img
-            class="w-110 z-10"
+            class="stack-card stack-card-center w-110 z-10"
             style="transform: translateZ(40px) translateY(-10px);"
             src="rho@2x.png"
           />
 
           <!-- Right card -->
           <img
-            class="w-90"
+            class="stack-card stack-card-right w-90"
             style="transform: rotateY(-22deg) rotateX(6deg) translateZ(-40px) translateY(25px);"
             src="kit@2x.png"
           />
@@ -284,4 +284,44 @@ const features = [
       </div>
     </div>
   </footer>
+
+  <style>
+    .hero-stack {
+      perspective: 1200px;
+      transform-style: preserve-3d;
+    }
+
+    .stack-card {
+      flex: 0 0 auto;
+      max-width: min(100%, 31rem);
+      box-shadow:
+        0 24px 80px rgba(0, 0, 0, 0.28),
+        0 1px 0 rgba(255, 255, 255, 0.06) inset;
+    }
+
+    @media (max-width: 767px) {
+      .hero-stack {
+        display: grid;
+        gap: 1rem;
+        justify-items: center;
+        padding-inline: 0.25rem;
+      }
+
+      .stack-card {
+        width: min(100%, 29rem);
+        max-width: 100%;
+        transform: none !important;
+      }
+
+      .stack-card-center {
+        width: min(100%, 31rem);
+      }
+    }
+
+    @media (min-width: 768px) {
+      .stack-card {
+        will-change: transform;
+      }
+    }
+  </style>
 </html>
