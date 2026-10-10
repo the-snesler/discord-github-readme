@@ -101,24 +101,32 @@ interface ProgressBarProps {
 }
 
 function RenderProgressBar({ timeStart, timeEnd, x, y, colors }: ProgressBarProps) {
-  const totalActivityLength = prettyDuration(timeEnd - timeStart);
-  const progress = Math.min((Date.now() - timeStart) / (timeEnd - timeStart), 1);
-  const timeElapsed = timeStart ? prettyDuration(Date.now() - timeStart) : "";
+  const currentTime = Date.now();
+  const totalLength = timeEnd - timeStart;
+  const totalActivityLength = prettyDuration(totalLength);
+  const progress = Math.min((currentTime - timeStart) / totalLength, 1);
   const barWidth = 700 - x - 140;
+  const elapsedValues: string[] = [];
+  for (let i = 0; i < 30; i++) {
+    const futureElapsed = currentTime - timeStart + i * 1000;
+    elapsedValues.push(prettyDuration(Math.min(futureElapsed, totalLength)));
+    if (futureElapsed >= totalLength) break; // stop once we've reached the end
+  }
 
   return (
     <g>
-      <text
-        style={{
-          fill: colors.colorT2,
-          fontFamily: fontFamily,
-          fontSize: "20px",
+      <AnimatedText
+        strings={elapsedValues}
+        attrs={{
+          style: {
+            fill: colors.colorT2,
+            fontFamily: fontFamily,
+            fontSize: "20px",
+          },
+          x: x,
+          y: y + 30,
         }}
-        x={x}
-        y={y + 30}
-      >
-        {Date.now() > timeEnd ? totalActivityLength : timeElapsed}
-      </text>
+      />
       <rect
         x={x + 50}
         y={y + 22}
@@ -134,7 +142,18 @@ function RenderProgressBar({ timeStart, timeEnd, x, y, colors }: ProgressBarProp
         height="6"
         rx="3"
         style={{ fill: colors.colorT1 }}
-      />
+      >
+        {progress < 1 && (
+          <animate
+            attributeName="width"
+            from={barWidth * progress}
+            to={barWidth}
+            begin="0s"
+            dur={`${(timeEnd - currentTime) / 1000}s`}
+            fill="freeze"
+          />
+        )}
+      </rect>
       <text
         style={{
           fill: colors.colorT2,

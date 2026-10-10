@@ -60,7 +60,7 @@ export function AnimatedText({ strings, attrs }: AnimatedTextProps) {
       {strings.map((str, index) => {
         const animations = [];
         
-        if (index === 0) {
+        if (index === 0 && strings.length > 1) {
           animations.push(
             <set key="hide" attributeName="opacity" to="0" begin="1s" fill="freeze" />
           );
